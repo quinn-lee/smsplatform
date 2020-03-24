@@ -1,47 +1,39 @@
 <!DOCTYPE html>
 <html>
-<head>
+<head> 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>微电影管理系统</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="shortcut icon" href="{{ url_for('static',filename='base/images/logo.png">
-    <link rel="stylesheet" href="../admin/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../fonts/css/font-awesome.min.css">
-    <link rel="stylesheet" href="../ionicons/css/ionicons.min.css">
-    <link rel="stylesheet" href="../admin/dist/css/AdminLTE.min.css">
-    <link rel="stylesheet" href="../admin/plugins/iCheck/square/blue.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>短信管理平台</title>
+    <link href="/static/login_css_js/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/login_css_js/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="/static/login_css_js/css/reset.css" rel="stylesheet">
+    <link href="/static/login_css_js/css/main/main.css" rel="stylesheet">
+    <link href="/static/login_css_js/css/main/login.css" rel="stylesheet">
 </head>
-<body class="hold-transition login-page">
-<div class="login-box">
-    <div class="login-logo">
-        <a href=""><b>短信管理系统</b></a>
-    </div>
-    <div class="login-box-body">
-        <p class="login-box-msg"></p>
-        <form action="" method="post" id="form-data">
-            <div class="form-group has-feedback">
-                <input name="user" type="text" class="form-control" placeholder="请输入账号！">
-                <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
-                <div class="col-md-12" id="input_user"></div>
-            </div>
-            <div class="form-group has-feedback">
-                <input name="pwd" type="password" class="form-control" placeholder="请输入密码！">
-                <span class="glyphicon glyphicon-lock form-control-feedback"></span>
-                <div class="col-md-12" id="input_pwd"></div>
-            </div>
-            <div class="row">
-                <div class="col-xs-8">
-                </div>
-                <div class="col-xs-4">
-                    <a id="btn-sub" type="submit" class="btn btn-primary btn-block btn-flat">登录</a>
+<body>
+    <div class="container">
+
+        <form class="form-login">
+            <div class="form-group form-group-lg">
+                <div class="input-group">
+                    <div class="input-group-addon"><i class="fa fa-user fa-lg fa-fw"></i></div>
+                    <input type="email" class="form-control" name="mobile" id="mobile" placeholder="邮箱" required>
                 </div>
             </div>
+            <div class="error-msg" id="mobile-err"><i class="fa fa-exclamation-circle"></i><span></span></div>
+            <div class="form-group form-group-lg">
+                <div class="input-group">
+                    <div class="input-group-addon"><i class="fa fa-lock fa-lg fa-fw"></i></div>
+                    <input type="password" class="form-control" name="password" id="password" placeholder="密码" required>
+                </div>
+            </div>
+            <div class="error-msg" id="password-err"><i class="fa fa-exclamation-circle"></i><span></span></div>
+            <button type="submit" class="btn btn-lg btn-theme btn-block">登录</button>
         </form>
     </div>
-</div>
-<script src="../admin/plugins/jQuery/jQuery-2.2.0.min.js"></script>
-<script src="../admin/bootstrap/js/bootstrap.min.js"></script>
-<script src="../admin/plugins/iCheck/icheck.min.js"></script>
+    <script src="/static/login_css_js/js/jquery.min.js"></script>
+    <script src="/static/login_css_js/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/login_css_js/js/main/login.js"></script>
 </body>
 </html>

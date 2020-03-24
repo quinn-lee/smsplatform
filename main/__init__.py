@@ -6,6 +6,7 @@ from config import environment_mapping
 from flask_wtf import CSRFProtect
 import logging
 from logging.handlers import RotatingFileHandler
+from main.utils.commons import ReConverter
 
 
 db = SQLAlchemy()
@@ -21,6 +22,7 @@ file_log_handler.setFormatter(formatter)
 # 为全局日志工具对象添加日志记录器
 logging.getLogger().addHandler(file_log_handler)
 
+
 # 工厂方法
 def create_app(environment):
     """
@@ -34,11 +36,18 @@ def create_app(environment):
     db.init_app(app)
 
     # csrf保护
-    CSRFProtect(app)
+    # CSRFProtect(app)
+
+    # 为flask添加自定义的转换器
+    app.url_map.converters["re"] = ReConverter
 
     # 注册蓝图
     from main.api_1_0 import api as api_blueprint
-    app.register_blueprint(api_blueprint)
+    app.register_blueprint(api_blueprint, url_prefix="/api/v1.0")
+
+    # 注册提供静态文件的蓝图
+    from main import web_html
+    app.register_blueprint(web_html.html)
 
     return app
 
