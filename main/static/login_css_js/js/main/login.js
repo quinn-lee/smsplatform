@@ -4,7 +4,7 @@ function getCookie(name) {
 }
 
 $(document).ready(function() {
-    $("#mobile").focus(function(){
+    $("#email").focus(function(){
         $("#mobile-err").hide();
     });
     $("#password").focus(function(){
@@ -12,10 +12,10 @@ $(document).ready(function() {
     });
     $(".form-login").submit(function(e){
         e.preventDefault();
-        mobile = $("#mobile").val();
+        email = $("#email").val();
         passwd = $("#password").val();
-        if (!mobile) {
-            $("#mobile-err span").html("请填写正确的手机号！");
+        if (!email) {
+            $("#mobile-err span").html("请填写正确的邮箱！");
             $("#mobile-err").show();
             return;
         } 
@@ -26,7 +26,7 @@ $(document).ready(function() {
         }
         // 将表单的数据存放到对象data中
         var data = {
-            mobile: mobile,
+            email: email,
             password: passwd
         };
         // 将data转为json字符串

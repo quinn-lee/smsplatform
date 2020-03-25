@@ -40,10 +40,6 @@ class User(db.Model):
         """
         self.pwd = generate_password_hash(value)
 
-    # def generate_password_hash(self, origin_password):
-    #     """对密码进行加密"""
-    #     self.password_hash = generate_password_hash(origin_password)
-
     def check_password(self, passwd):
         """
         检验密码正确性

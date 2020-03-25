@@ -4,6 +4,7 @@ from main import models
 from flask import request, jsonify, current_app, session
 from main.models import User, UserLog
 from main.utils.response_code import RET
+from main import db
 import re
 
 
@@ -47,6 +48,15 @@ def login():
     if user is None or not user.check_password(password):
         current_app.logger.error(password)
         return jsonify(errno=RET.DATAERR, errmsg="用户名或密码错误")
+
+    # 保存登录记录
+    user_log = UserLog(user_id=user.id, ip=user_ip)
+    try:
+        db.session.add(user_log)
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmag="数据库异常")
 
     # 如果验证相同成功,保存登录状态, 在 session中
     session["name"] = user.name
