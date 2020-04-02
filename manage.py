@@ -6,7 +6,7 @@ from flask_migrate import Migrate, MigrateCommand
 from main import create_app, db
 from flask_script import Shell
 from main.models import User, UserLog
-from main.lib.smsapi import SmsApi
+from main.libs.smsapi import SmsApi
 
 app = create_app("development")
 # 初始化管理器
