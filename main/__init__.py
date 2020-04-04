@@ -7,9 +7,14 @@ from flask_wtf import CSRFProtect
 import logging
 from logging.handlers import RotatingFileHandler
 from main.utils.commons import ReConverter
+from celery import Celery
+from main.libs.smsapi import SmsApi
 
 
 db = SQLAlchemy()
+
+celery = Celery("main", broker="redis://127.0.0.1:6379", include=['main.tasks.task_his'])
+
 
 # 设置日志的记录等级
 logging.basicConfig(level=logging.DEBUG)  # 调试debug级
@@ -51,3 +56,5 @@ def create_app(environment):
 
     return app
 
+
+app = create_app("development")
