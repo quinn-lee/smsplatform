@@ -16,3 +16,4 @@ def handle_apply(user):
         db.session.add(user)
         db.session.commit()
         print(user.pwd)
+    print("tasksbbbbbbbbbbbbbbbbbbbbb")
