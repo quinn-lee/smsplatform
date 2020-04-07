@@ -9,12 +9,16 @@ from logging.handlers import RotatingFileHandler
 from main.utils.commons import ReConverter
 from celery import Celery
 from main.libs.smsapi import SmsApi
+from flask_apscheduler import APScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
+from flask import current_app
 
 
 db = SQLAlchemy()
 
 celery = Celery("main", broker="redis://127.0.0.1:6379", include=['main.tasks.task_his'])
 
+scheduler = APScheduler(BackgroundScheduler(timezone="Asia/Shanghai"))
 
 # 设置日志的记录等级
 logging.basicConfig(level=logging.DEBUG)  # 调试debug级
@@ -28,6 +32,19 @@ file_log_handler.setFormatter(formatter)
 logging.getLogger().addHandler(file_log_handler)
 
 
+def report_query():
+    """发送短信的定时查询任务"""
+    """测试"""
+    with app.app_context():
+        current_app.logger.info("aaaaaaaa")
+        smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
+        result = smsapi.query()
+        current_app.logger.info(result)
+        from main.models import User
+        user = User.query.filter_by(email="lifuyuan33@hotmail.com").first()
+        current_app.logger.info(user.pwd)
+
+
 # 工厂方法
 def create_app(environment):
     """
@@ -39,6 +56,24 @@ def create_app(environment):
     app.config.from_object(environment_mapping.get(environment))
 
     db.init_app(app)
+
+    app.config.update(
+        {
+            'JOBS': [
+                {
+                    'id': 'job1',
+                    'func': report_query,
+                    "trigger": "interval",
+                    "seconds": 30
+                }
+            ],
+            'SCHEDULER_TIMEZONE': 'Asia/Shanghai',
+            'SCHEDULER_API_ENABLED': True,
+        }
+    )
+    scheduler.init_app(app)
+    scheduler.start()
+
 
     # csrf保护
     # CSRFProtect(app)
@@ -58,3 +93,4 @@ def create_app(environment):
 
 
 app = create_app("development")
+

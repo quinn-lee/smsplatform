@@ -2,7 +2,7 @@ import sys
 from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
-from manage import app
+from main import app
 
 if len(sys.argv) == 2:
     port = sys.argv[1]
