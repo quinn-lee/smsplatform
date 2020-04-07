@@ -12,13 +12,13 @@ from main.libs.smsapi import SmsApi
 from flask_apscheduler import APScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import current_app
+import sys, socket
 
 
 db = SQLAlchemy()
 
 celery = Celery("main", broker="redis://127.0.0.1:6379", include=['main.tasks.task_his'])
 
-scheduler = APScheduler(BackgroundScheduler(timezone="Asia/Shanghai"))
 
 # 设置日志的记录等级
 logging.basicConfig(level=logging.DEBUG)  # 调试debug级
@@ -57,6 +57,7 @@ def create_app(environment):
 
     db.init_app(app)
 
+    # 定时任务相关配置
     app.config.update(
         {
             'JOBS': [
@@ -71,9 +72,17 @@ def create_app(environment):
             'SCHEDULER_API_ENABLED': True,
         }
     )
-    scheduler.init_app(app)
-    scheduler.start()
-
+    # 防止多进程部署时，定时任务重复启动
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.bind(("127.0.0.1", 47200))
+    except socket.error:
+        print("!!!scheduler already started, DO NOTHING")
+    else:
+        scheduler = APScheduler(BackgroundScheduler(timezone="Asia/Shanghai"))
+        scheduler.init_app(app)
+        scheduler.start()
+        print("scheduler started")
 
     # csrf保护
     # CSRFProtect(app)
