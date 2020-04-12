@@ -12,13 +12,15 @@ from main.libs.smsapi import SmsApi
 from flask_apscheduler import APScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import current_app
-import sys, socket
+import socket
+from flask_httpauth import HTTPTokenAuth
 
 
 db = SQLAlchemy()
 
 celery = Celery("main", broker="redis://127.0.0.1:6379", include=['main.tasks.task_his'])
 
+auth = HTTPTokenAuth(scheme='Token')
 
 # 设置日志的记录等级
 logging.basicConfig(level=logging.DEBUG)  # 调试debug级

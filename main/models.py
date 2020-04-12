@@ -1,13 +1,16 @@
 # coding:utf-8
 import datetime
-from main import db
+import time
+import hashlib
+from main import db, auth
+from flask import current_app, g
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
 # 用户
 class User(db.Model):
     __tablename__ = 'user'
-    id = db.Column(db.Integer, primary_key=True)  # 编号
+    id = db.Column(db.Integer, primary_key=True)  # 主键
     name = db.Column(db.String(100), unique=True)  # 昵称
     pwd = db.Column(db.String(100))  # 密码，加密
     email = db.Column(db.String(100), unique=True)  # 邮箱
@@ -17,6 +20,7 @@ class User(db.Model):
     add_time = db.Column(db.DateTime, index=True, default=datetime.datetime.now)  # 添加时间
     uuid = db.Column(db.String(255), unique=True)  # 唯一标识符
     userlogs = db.relationship('UserLog', backref='user')  # 会员日志外键关系关联，backref互相绑定user表
+    api_key = db.Column(db.String(255), unique=True)  # 接口认证私钥
 
     def __repr__(self):  # 查询的时候返回
         return "<User %r>" % self.name
@@ -47,6 +51,29 @@ class User(db.Model):
         :return:  如果正确返回True 否则返回 False
         """
         return check_password_hash(self.pwd, passwd)
+
+    # 回调函数，验证 token 是否合法
+    @staticmethod
+    @auth.verify_token
+    def verify_token(token):
+        uuid, timestamp, md5_code = token.split("&")
+        print(uuid)
+        print(timestamp)
+        print(md5_code)
+        if int((time.time() * 1000 - int(timestamp)) / 1000 / 60) > 5:
+            # raise Exception("时间戳与当前时间差大于5分钟")
+            return False
+        user = User.query.filter_by(uuid=uuid).first()
+        if user is not None:
+            print(hashlib.md5((str(uuid) + str(timestamp) + user.api_key).encode("utf-8")).hexdigest())
+            if hashlib.md5((str(uuid) + str(timestamp) + user.api_key).encode("utf-8")).hexdigest() == md5_code:
+                g.current_user = user
+                return True
+            else:
+                # raise Exception("私钥验证失败")
+                return False
+        # raise Exception("用户编码验证失败")
+        return False
 
 
 # 登录日志

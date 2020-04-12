@@ -4,7 +4,7 @@
 class Config(object):
     """配置信息"""
 
-    SECRET_KEY = "ADSFE5*ad4f8843e5f1654s5"
+    SECRET_KEY = "e096240bbf710ab5053ce04a971ac9bc710099b21df06fcd9ffb1d6a196"
 
     SQLALCHEMY_DATABASE_URI = "postgresql://smsp:fuyuan@localhost:5432/smsp_db"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
