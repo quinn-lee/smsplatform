@@ -7,6 +7,7 @@ from main import app, db
 from flask_script import Shell
 from main.models import User, UserLog
 from main.libs.smsapi import SmsApi
+from getpass import getpass
 
 
 # 初始化管理器
@@ -22,6 +23,18 @@ def make_shell_context():
 
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
+
+
+@manager.command
+def adduser():
+    name = input('Username> ')
+    email = input('Email> ')
+    phone = input('Phone> ')
+    input_password = getpass('Password> ')
+    new = User(name=name, email=email, phone=phone, password=input_password)
+    db.session.add(new)
+    db.session.commit()
+    print("new user <%s> created" % name)
 
 
 if __name__ == "__main__":

@@ -13,10 +13,14 @@ class SmsApi:
         self.UserID = userid
         self.ApiKey = apikey
 
-    def send(self, mobile, msg):
+    def send(self, mobile, msg, messageid=None):
         ts = self._getTimeStamp()
         sign = self._signdigest(ts)
-        params = {'userid': self.UserID, 'ts': ts, 'sign': sign, 'mobile': mobile, 'msgcontent': msg, 'extnum': ''}
+        if messageid is None:
+            params = {'userid': self.UserID, 'ts': ts, 'sign': sign, 'mobile': mobile, 'msgcontent': msg, 'extnum': ''}
+        else:
+            params = {'userid': self.UserID, 'ts': ts, 'sign': sign, 'mobile': mobile, 'msgcontent': msg, 'extnum': '',
+                      'messageid': messageid}
         return self._post("/api/sms/send", urllib.parse.urlencode(params))
 
     def _signdigest(self, ts):
