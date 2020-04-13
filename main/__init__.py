@@ -22,6 +22,8 @@ celery = Celery("main", broker="redis://127.0.0.1:6379", include=['main.tasks.ta
 
 auth = HTTPTokenAuth(scheme='Token')
 
+scheduler = APScheduler(BackgroundScheduler(timezone="Asia/Shanghai"))
+
 # 设置日志的记录等级
 logging.basicConfig(level=logging.DEBUG)  # 调试debug级
 # 创建日志记录器，指明日志保存的路径、每个日志文件的最大大小、保存的日志文件个数上限
@@ -74,17 +76,8 @@ def create_app(environment):
             'SCHEDULER_API_ENABLED': True,
         }
     )
-    # 防止多进程部署时，定时任务重复启动
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind(("127.0.0.1", 47200))
-    except socket.error:
-        print("!!!scheduler already started, DO NOTHING")
-    else:
-        scheduler = APScheduler(BackgroundScheduler(timezone="Asia/Shanghai"))
-        scheduler.init_app(app)
-        scheduler.start()
-        print("scheduler started")
+
+    scheduler.init_app(app)
 
     # csrf保护
     # CSRFProtect(app)
