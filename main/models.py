@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 import random
+from sqlalchemy import Sequence
 
 
 # 用户
@@ -170,7 +171,7 @@ class MessageLog(db.Model):
 class TaskQueue(db.Model):
     __tablename__ = "taskqueue"
     id = db.Column(db.Integer, primary_key=True)  # 主键
-    reference_id = db.Column(db.String(32), index=True)  # 任务号 or 短信请求唯一码 or 短信回调唯一码
+    queue_no = db.Column(db.String(32), index=True)  # 任务号 or 短信请求唯一号 or 短信回调唯一号
     task_type = db.Column(db.String(32))  # 任务类型 apply|send|callback
     status = db.Column(db.String(32))  # 任务状态
     run_batch = db.Column(db.String(32))  # 处理批次
