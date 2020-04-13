@@ -132,7 +132,10 @@ class MessageTask(db.Model):
         self.msgcontent = msgcontent
         self.send_date = send_date
         self.receivers = receivers
-        self.task_no = "T{}{}{}".format(str(int(round(time.time() * 1000))), self.id, random.randint(10000, 99999))
+        sequence = Sequence('some_no_seq')
+        seq = db.session.execute(sequence)
+        self.task_no = "T{}{}".format(str(int(round(time.time() * 1000))), seq)
+        self.status = "已申请，等待发送处理"
 
 
 # 短信日志
