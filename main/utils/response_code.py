@@ -3,6 +3,7 @@
 
 class RET:
     OK = "0"
+    AUTHERROR = "2001"
     DBERR = "4001"
     NODATA = "4002"
     DATAEXIST = "4003"
@@ -21,8 +22,10 @@ class RET:
     UNKOWNERR = "4501"
     NOTJSON = "4600"
 
+
 error_map = {
     RET.OK: u"成功",
+    RET.AUTHERROR: u"权限验证失败",
     RET.DBERR: u"数据库查询错误",
     RET.NODATA: u"无数据",
     RET.DATAEXIST: u"数据已存在",

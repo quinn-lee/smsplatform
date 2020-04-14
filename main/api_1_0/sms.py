@@ -75,4 +75,4 @@ def send():
 
 @auth.error_handler
 def auth_error():
-    return jsonify(code="1", msg="权限验证失败"), 403
+    return jsonify(code=RET.AUTHERROR, msg=g.auth_msg)

@@ -75,7 +75,7 @@ class User(db.Model):
         print(timestamp)
         print(md5_code)
         if int((time.time() * 1000 - int(timestamp)) / 1000 / 60) > 5:
-            # raise Exception("时间戳与当前时间差大于5分钟")
+            g.auth_msg = "权限验证失败，时间戳与当前时间差大于5分钟"
             return False
         user = User.query.filter_by(uuid=uuid).first()
         if user is not None:
@@ -84,9 +84,9 @@ class User(db.Model):
                 g.current_user = user
                 return True
             else:
-                # raise Exception("私钥验证失败")
+                g.auth_msg = "权限验证失败，私钥错误"
                 return False
-        # raise Exception("用户编码验证失败")
+        g.auth_msg = "权限验证失败，用户编码错误"
         return False
 
 
