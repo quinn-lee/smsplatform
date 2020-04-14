@@ -12,8 +12,12 @@ from main.libs.smsapi import SmsApi
 from flask_apscheduler import APScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import current_app
-import socket
+import time
 from flask_httpauth import HTTPTokenAuth
+import asyncio
+from sqlalchemy import Sequence
+import datetime
+import os
 
 
 db = SQLAlchemy()
@@ -40,13 +44,119 @@ def report_query():
     """发送短信的定时查询任务"""
     """测试"""
     with app.app_context():
+        if os.path.exists('shutdown.txt'):
+            scheduler.shutdown()
         current_app.logger.info("aaaaaaaa")
         smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
         result = smsapi.query()
         current_app.logger.info(result)
-        from main.models import User
-        user = User.query.filter_by(email="lifuyuan33@hotmail.com").first()
-        current_app.logger.info(user.pwd)
+
+
+def handle_apply():
+    """HIS短信批量请求处理定时任务"""
+    with app.app_context():
+        if os.path.exists('shutdown.txt'):
+            scheduler.shutdown()
+        from main.models import TaskQueue, MessageLog, MessageTask
+        ts = time.strftime("%Y%m%d%H%M%S", time.localtime())
+        tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == None,
+                                     TaskQueue.task_type == 'apply').limit(5)
+        if tqs.count() == 0:
+            current_app.logger.info("no tqs to handle!!!")
+            return
+        for tq in tqs:
+            tq.run_batch = ts
+            tq.start_handle_time = datetime.datetime.now()
+            tq.last_handle_time = datetime.datetime.now()
+            db.session.add(tq)
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return
+
+        async def process_tq(tq):
+            try:
+                mt = MessageTask.query.filter_by(task_no=tq.queue_no).first()
+                for i in range(0, len(mt.receivers), 1000):
+                    mobiles = mt.receivers[i: i + 1000]
+                    sequence = Sequence('some_no_seq')
+                    seq = db.session.execute(sequence)
+                    message_id = "M{}{}".format(str(int(round(time.time() * 1000))), seq)
+                    new_tq = TaskQueue(queue_no=message_id, task_type='send', status='init', try_amount=20,
+                                       tried_amount=0)
+                    db.session.add(new_tq)
+                    for mobile in mobiles:
+                        age = None
+                        try:
+                            age = int(mobile.get('age'))
+                        except:
+                            age = None
+
+                        ml = MessageLog(message_id=message_id, user_id=mt.user_id, messagetask_id=mt.id,
+                                        task_no=mt.task_no, apply_no=mt.apply_no, org_code=mt.org_code,
+                                        org_name=mt.org_name, send_class=mt.send_class, send_name=mt.send_name,
+                                        msgcontent=mt.msgcontent, send_date=mt.send_date,
+                                        patient_id=mobile.get('patient_id'), org_form_no=mobile.get('org_form_no'),
+                                        name=mobile.get('name'), age=age, id_no=mobile.get('id_no'),
+                                        mobile=mobile.get('mobile'))
+                        db.session.add(ml)
+                tq.status = 'succ'
+                tq.last_handle_result = None
+                db.session.add(tq)
+                try:
+                    db.session.commit()
+                except Exception as exp:
+                    print("rollback1")
+                    db.session.rollback()
+                    raise exp
+                return "{} success".format(tq.queue_no)
+            except Exception as error:
+                tq.tried_amount = tq.tried_amount + 1
+                if tq.tried_amount > tq.try_amount:
+                    tq.status = 'fail_limited'
+                else:
+                    tq.status = 'fail'
+                tq.run_batch = None
+                tq.last_handle_result = str(error)[0:100]
+                tq.last_handle_time = datetime.datetime.now()
+                db.session.add(tq)
+                try:
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback()
+                # current_app.logger.info(error)
+                # print("{} error-{}".format(tq.queue_no, error))
+                return "{} error-{}".format(tq.queue_no, error)
+        tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == ts,
+                                     TaskQueue.task_type == 'apply')
+        print(tqs.count())
+        if tqs.count() == 0:
+            current_app.logger.info("no tqs to handle!!!")
+            return
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        loop = asyncio.get_event_loop()
+        try:
+            tasks = [asyncio.ensure_future(process_tq(tq)) for tq in tqs]
+            print(len(tasks))
+
+            loop.run_until_complete(asyncio.wait(tasks))
+
+            for task in tasks:
+                print('Task ret: ', task.result())
+        except Exception as e:
+            for tq in tqs:
+                tq.run_batch = None
+                tq.last_handle_result = str(e)[0:100]
+                tq.last_handle_time = datetime.datetime.now()
+                db.session.add(tq)
+            try:
+                db.session.commit()
+            except Exception as e:
+                print(e)
+                db.session.rollback()
 
 
 # 工厂方法
@@ -66,14 +176,21 @@ def create_app(environment):
         {
             'JOBS': [
                 {
-                    'id': 'job1',
+                    'id': 'handle_apply',
+                    'func': handle_apply,
+                    "trigger": "interval",
+                    "seconds": 5
+                },
+                {
+                    'id': 'report_query',
                     'func': report_query,
                     "trigger": "interval",
-                    "seconds": 30
+                    "seconds": 10
                 }
             ],
             'SCHEDULER_TIMEZONE': 'Asia/Shanghai',
             'SCHEDULER_API_ENABLED': True,
+            'SCHEDULER_JOB_DEFAULTS': {'max_instances': 3}
         }
     )
 
