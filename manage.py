@@ -79,19 +79,11 @@ def test_api():
             {
                 "patient_id": "",
                 "org_form_no": "",
-                "name": "45",
+                "name": "test{}".format(i),
                 "age": "",
                 "id_no": "",
                 "mobile": "13917050484"
-            },
-            {
-                "patient_id": "",
-                "org_form_no": "",
-                "name": "",
-                "age": "",
-                "id_no": "",
-                "mobile": "13313313311"
-            }
+            } for i in range(11111)
         ]
     }
     res = _post("/api/v1.0/sms/send", json.dumps(data))

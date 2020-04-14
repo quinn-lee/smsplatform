@@ -7,7 +7,6 @@ from flask import current_app, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
-import random
 from sqlalchemy import Sequence
 
 
