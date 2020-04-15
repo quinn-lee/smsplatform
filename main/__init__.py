@@ -87,8 +87,7 @@ def report_query():
             except Exception as error:
                 return "report_query error-{}".format(error)
 
-        mls = MessageLog.query.filter_by(mtq_code=None)
-        if mls.count() == 0:
+        if MessageLog.query.filter_by(mtq_code=None).count() == 0:
             current_app.logger.info("no message to query!!!")
             return
         new_loop = asyncio.new_event_loop()
