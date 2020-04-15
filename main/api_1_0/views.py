@@ -28,3 +28,8 @@ def mainsleep():
     time.sleep(10)
     return 'wake up'
 
+
+@api.route('/report/push', methods=["POST"])
+def report_push():
+    return "SUCCESS"
+

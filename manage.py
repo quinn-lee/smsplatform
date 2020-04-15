@@ -8,9 +8,6 @@ from flask_script import Shell
 from main.models import User, UserLog, MessageLog, MessageTask, TaskQueue
 from main.libs.smsapi import SmsApi
 from getpass import getpass
-import http.client
-import time
-import hashlib
 import json
 
 
@@ -42,28 +39,6 @@ def adduser():
     print("new user <%s> created" % name)
 
 
-def _post(method, data):
-    conn = None
-    try:
-        user = User.query.first()
-        ts = str(int(round(time.time() * 1000)))
-        md5_code = hashlib.md5((str(user.uuid) + str(ts) + str(user.api_key)).encode("utf-8")).hexdigest()
-        print(md5_code)
-        headers = {"Content-type": "application/json",
-                   "Authorization": "Token {}&{}&{}".format(user.uuid, ts, md5_code)}
-        conn = http.client.HTTPConnection("127.0.0.1", "5000", timeout=200)
-        conn.request("POST", method, data, headers)
-        response = conn.getresponse()
-        retmsg = response.read().decode("utf8")
-        conn.close()
-        return retmsg
-    except Exception as e:
-        print(e)
-    finally:
-        if conn:
-            conn.close()
-
-
 @manager.command
 def test_api():
     apply_no = input('Apply_no> ')
@@ -74,19 +49,20 @@ def test_api():
         "send_class": "产前检查",
         "send_name": "钟",
         "msgcontent": "【汀州医院】哈哈哈",
-        "send_date": "",
+        "send_date": "2020-04-09 12:45:06",
         "receivers": [
             {
-                "patient_id": "",
-                "org_form_no": "",
+                "patient_id": "111111111111111111111111",
+                "org_form_no": "1111111111111111111111111111111111111",
                 "name": "test{}".format(i),
-                "age": "",
-                "id_no": "",
-                "mobile": "13917050484"
-            } for i in range(11111)
+                "age": 30,
+                "id_no": "35082119860409045X",
+                "mobile": "13305915399"
+            } for i in range(11999)
         ]
     }
-    res = _post("/api/v1.0/sms/send", json.dumps(data))
+    from main.utils.commons import token_post
+    res = token_post("/api/v1.0/sms/send", json.dumps(data))
     print(res)
 
 
