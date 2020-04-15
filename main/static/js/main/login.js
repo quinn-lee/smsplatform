@@ -5,23 +5,23 @@ function getCookie(name) {
 
 $(document).ready(function() {
     $("#email").focus(function(){
-        $("#mobile-err").hide();
+        $("#login-err").hide();
     });
     $("#password").focus(function(){
-        $("#password-err").hide();
+        $("#login-err").hide();
     });
     $(".form-login").submit(function(e){
         e.preventDefault();
         email = $("#email").val();
         passwd = $("#password").val();
         if (!email) {
-            $("#mobile-err span").html("请填写正确的邮箱！");
-            $("#mobile-err").show();
+            $("#login-err h4").html("请填写正确的邮箱！");
+            $("#login-err").show();
             return;
         } 
         if (!passwd) {
-            $("#password-err span").html("请填写密码!");
-            $("#password-err").show();
+            $("#login-err h4").html("请填写密码!");
+            $("#login-err").show();
             return;
         }
         // 将表单的数据存放到对象data中
@@ -47,8 +47,8 @@ $(document).ready(function() {
                 }
                 else {
                     // 其他错误信息，在页面中展示
-                    $("#password-err span").html(data.errmsg);
-                    $("#password-err").show();
+                    $("#login-err h4").html(data.errmsg);
+                    $("#login-err").show();
                 }
             }
         });
