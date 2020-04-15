@@ -18,6 +18,7 @@ import asyncio
 from sqlalchemy import Sequence
 import datetime
 import os
+import json
 
 
 db = SQLAlchemy()
@@ -42,7 +43,6 @@ logging.getLogger().addHandler(file_log_handler)
 
 def report_query():
     """发送短信的定时查询任务"""
-    """测试"""
     with app.app_context():
         if os.path.exists('shutdown.txt'):
             scheduler.shutdown()
@@ -159,6 +159,109 @@ def handle_apply():
                 db.session.rollback()
 
 
+# 定时调用发送短信接口
+def send_sms():
+    """HIS短信批量请求处理定时任务"""
+    with app.app_context():
+        if os.path.exists('shutdown.txt'):
+            scheduler.shutdown()
+        from main.models import TaskQueue, MessageLog, MessageTask
+        ts = time.strftime("%Y%m%d%H%M%S", time.localtime())
+        tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == None,
+                                     TaskQueue.task_type == 'send').limit(10)
+        if tqs.count() == 0:
+            current_app.logger.info("no tqs to send!!!")
+            return
+        for tq in tqs:
+            tq.run_batch = ts
+            tq.start_handle_time = datetime.datetime.now()
+            tq.last_handle_time = datetime.datetime.now()
+            db.session.add(tq)
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return
+
+        async def send_tq(tq):
+            try:
+                mls = MessageLog.query.filter_by(message_id=tq.queue_no)
+                if mls.count() == 0:
+                    return "{} no messages to send".format(tq.queue_no)
+                mobiles = ','.join(set([str(ml.mobile).replace(',', '') for ml in mls]))
+                msg = mls.first().msgcontent
+                smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
+                result = json.loads(smsapi.send(mobiles, msg, tq.queue_no))
+                print(result)
+                if result.get('code') == "0":  # 成功
+                    tq.status = 'succ'
+                    tq.last_handle_result = None
+                    db.session.add(tq)
+                    for ml in mls:
+                        try:
+                            mt_taskid = result.get('data').get('taskeid')
+                        except Exception:
+                            mt_taskid = None
+                        ml.mt_code = result.get('code')
+                        ml.mt_msg = result.get('msg')
+                        ml.mt_taskid = mt_taskid
+                        db.session.add(ml)
+                    try:
+                        db.session.commit()
+                    except Exception as exp:
+                        print("rollback1")
+                        db.session.rollback()
+                        raise exp
+                    return "{} success".format(tq.queue_no)
+                else:  # 失败
+                    raise Exception("{}-{}".format(result.get('code'), result.get('msg')))
+            except Exception as error:
+                tq.tried_amount = tq.tried_amount + 1
+                if tq.tried_amount > tq.try_amount:
+                    tq.status = 'fail_limited'
+                else:
+                    tq.status = 'fail'
+                tq.run_batch = None
+                tq.last_handle_result = str(error)[0:100]
+                tq.last_handle_time = datetime.datetime.now()
+                db.session.add(tq)
+                try:
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback()
+                return "{} error-{}".format(tq.queue_no, error)
+
+        tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == ts,
+                                     TaskQueue.task_type == 'send')
+        print(tqs.count())
+        if tqs.count() == 0:
+            current_app.logger.info("no tqs to send!!!")
+            return
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        loop = asyncio.get_event_loop()
+        try:
+            tasks = [asyncio.ensure_future(send_tq(tq)) for tq in tqs]
+            print(len(tasks))
+
+            loop.run_until_complete(asyncio.wait(tasks))
+
+            for task in tasks:
+                print('Task ret: ', task.result())
+        except Exception as e:
+            for tq in tqs:
+                tq.run_batch = None
+                tq.last_handle_result = str(e)[0:100]
+                tq.last_handle_time = datetime.datetime.now()
+                db.session.add(tq)
+            try:
+                db.session.commit()
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+
+
 # 工厂方法
 def create_app(environment):
     """
@@ -182,10 +285,10 @@ def create_app(environment):
                     "seconds": 5
                 },
                 {
-                    'id': 'report_query',
-                    'func': report_query,
+                    'id': 'send_sms',
+                    'func': send_sms,
                     "trigger": "interval",
-                    "seconds": 10
+                    "seconds": 5
                 }
             ],
             'SCHEDULER_TIMEZONE': 'Asia/Shanghai',
