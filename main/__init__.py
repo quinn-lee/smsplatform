@@ -46,10 +46,62 @@ def report_query():
     with app.app_context():
         if os.path.exists('shutdown.txt'):
             scheduler.shutdown()
-        current_app.logger.info("aaaaaaaa")
-        smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
-        result = smsapi.query()
-        current_app.logger.info(result)
+        from main.models import TaskQueue, MessageLog, MessageTask
+
+        async def query_sms(t):
+            try:
+                smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
+                result = json.loads(smsapi.query())
+                print(result)
+                if result.get('code') == "0":  # 成功
+                    if result.get('data') is not None:  # 有返回数据
+                        sequence = Sequence('some_no_seq')
+                        seq = db.session.execute(sequence)
+                        callback_id = "C{}{}".format(str(int(round(time.time() * 1000))), seq)
+                        new_tq = TaskQueue(queue_no=callback_id, task_type='callback', status='init', try_amount=20,
+                                           tried_amount=0)
+                        db.session.add(new_tq)
+                        for message in result.get('data'):
+                            mls = MessageLog.query.filter_by(message_id=message.get('messageid'),
+                                                            mt_taskid=message.get('taskid'),
+                                                            mobile=message.get('mobile'))
+                            for ml in mls:
+                                try:
+                                    stime = datetime.datetime.strptime(message.get('time'), "%Y%m%d%H%M%S")
+                                except Exception:
+                                    stime = None
+                                ml.mtq_code = message.get('code')
+                                ml.mtq_msg = message.get('msg')
+                                ml.mtq_time = stime
+                                ml.callback_id = callback_id
+                                db.session.add(ml)
+                        try:
+                            db.session.commit()
+                        except Exception as exp:
+                            print("rollback1")
+                            db.session.rollback()
+                            raise exp
+                        return "{} success".format(callback_id)
+                else:  # 失败
+                    raise Exception("{}-{}".format(result.get('code'), result.get('msg')))
+            except Exception as error:
+                return "report_query error-{}".format(error)
+
+        mls = MessageLog.query.filter_by(mtq_code=None)
+        if mls.count() == 0:
+            current_app.logger.info("no message to query!!!")
+            return
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        loop = asyncio.get_event_loop()
+        try:
+            tasks = [asyncio.ensure_future(query_sms(i)) for i in range(10)]
+            print(len(tasks))
+            loop.run_until_complete(asyncio.wait(tasks))
+            for task in tasks:
+                print('Task ret: ', task.result())
+        except Exception as e:
+            print("report_query error-{}".format(e))
 
 
 def handle_apply():
@@ -200,7 +252,7 @@ def send_sms():
                     db.session.add(tq)
                     for ml in mls:
                         try:
-                            mt_taskid = result.get('data').get('taskeid')
+                            mt_taskid = result.get('data').get('taskid')
                         except Exception:
                             mt_taskid = None
                         ml.mt_code = result.get('code')
@@ -282,13 +334,19 @@ def create_app(environment):
                     'id': 'handle_apply',
                     'func': handle_apply,
                     "trigger": "interval",
+                    "seconds": 10
+                },
+                {
+                    'id': 'report_query',
+                    'func': report_query,
+                    "trigger": "interval",
                     "seconds": 5
                 },
                 {
                     'id': 'send_sms',
                     'func': send_sms,
                     "trigger": "interval",
-                    "seconds": 5
+                    "seconds": 7
                 }
             ],
             'SCHEDULER_TIMEZONE': 'Asia/Shanghai',
