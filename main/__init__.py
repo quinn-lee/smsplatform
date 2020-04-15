@@ -314,6 +314,101 @@ def send_sms():
                 db.session.rollback()
 
 
+# 定时调用发送短信接口
+def report_sms():
+    """推送HIS短信报告定时任务"""
+    with app.app_context():
+        if os.path.exists('shutdown.txt'):
+            scheduler.shutdown()
+        from main.models import TaskQueue, MessageLog, MessageTask
+        ts = time.strftime("%Y%m%d%H%M%S", time.localtime())
+        tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == None,
+                                     TaskQueue.task_type == 'callback').limit(10)
+        if tqs.count() == 0:
+            current_app.logger.info("no tqs to report!!!")
+            return
+        for tq in tqs:
+            tq.run_batch = ts
+            tq.start_handle_time = datetime.datetime.now()
+            tq.last_handle_time = datetime.datetime.now()
+            db.session.add(tq)
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return
+
+        async def report_tq(tq):
+            try:
+                mls = MessageLog.query.filter_by(callback_id=tq.queue_no)
+                if mls.count() == 0:
+                    return "{} no messages to report".format(tq.queue_no)
+
+                data = [{"taskid": ml.task_no, "apply_no": ml.apply_no, "code": ml.mtq_code,
+                         "msg": ml.mtq_msg, "mobile": ml.mobile, "time":
+                             ml.mtq_time.strftime("%Y%m%d%H%M%S") if ml.mtq_time is not None else None} for ml in mls]
+                from main.utils.commons import common_post
+                result = common_post("127.0.0.1", "5000", "/api/v1.0/report/push", json.dumps(data))
+                if result == "SUCCESS":  # 成功
+                    tq.status = 'succ'
+                    tq.last_handle_result = None
+                    db.session.add(tq)
+                    try:
+                        db.session.commit()
+                    except Exception as exp:
+                        print("rollback1")
+                        db.session.rollback()
+                        raise exp
+                    return "{} success".format(tq.queue_no)
+                else:  # 失败
+                    raise Exception(result)
+            except Exception as error:
+                tq.tried_amount = tq.tried_amount + 1
+                if tq.tried_amount > tq.try_amount:
+                    tq.status = 'fail_limited'
+                else:
+                    tq.status = 'fail'
+                tq.run_batch = None
+                tq.last_handle_result = str(error)[0:100]
+                tq.last_handle_time = datetime.datetime.now()
+                db.session.add(tq)
+                try:
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback()
+                return "{} error-{}".format(tq.queue_no, error)
+
+        tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == ts,
+                                     TaskQueue.task_type == 'callback')
+        print(tqs.count())
+        if tqs.count() == 0:
+            current_app.logger.info("no tqs to send!!!")
+            return
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        loop = asyncio.get_event_loop()
+        try:
+            tasks = [asyncio.ensure_future(report_tq(tq)) for tq in tqs]
+            print(len(tasks))
+
+            loop.run_until_complete(asyncio.wait(tasks))
+
+            for task in tasks:
+                print('Task ret: ', task.result())
+        except Exception as e:
+            for tq in tqs:
+                tq.run_batch = None
+                tq.last_handle_result = str(e)[0:100]
+                tq.last_handle_time = datetime.datetime.now()
+                db.session.add(tq)
+            try:
+                db.session.commit()
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+
+
 # 工厂方法
 def create_app(environment):
     """
@@ -345,6 +440,12 @@ def create_app(environment):
                 {
                     'id': 'send_sms',
                     'func': send_sms,
+                    "trigger": "interval",
+                    "seconds": 7
+                },
+                {
+                    'id': 'report_sms',
+                    'func': report_sms,
                     "trigger": "interval",
                     "seconds": 7
                 }

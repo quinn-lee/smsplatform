@@ -40,7 +40,7 @@ def token_post(method, data):
             conn.close()
 
 
-# 带token认证的post
+# 普通post
 def common_post(ip, port, method, data):
     conn = None
     try:

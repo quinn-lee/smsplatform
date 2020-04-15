@@ -1,7 +1,7 @@
 # coding:utf-8
 from . import api
 from main import models
-from flask import current_app
+from flask import current_app, request
 import time
 
 
@@ -31,5 +31,6 @@ def mainsleep():
 
 @api.route('/report/push', methods=["POST"])
 def report_push():
+    print(request.get_data())
     return "SUCCESS"
 
