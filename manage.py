@@ -58,7 +58,7 @@ def test_api():
                 "age": 30,
                 "id_no": "35082119860409045X",
                 "mobile": "13305915399"
-            } for i in range(11999)
+            } for i in range(1230)
         ]
     }
     from main.utils.commons import token_post

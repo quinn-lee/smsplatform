@@ -67,12 +67,13 @@ def report_query():
                                                             mobile=message.get('mobile'))
                             for ml in mls:
                                 try:
-                                    stime = datetime.datetime.strptime(message.get('time'), "%Y%m%d%H%M%S")
+                                    time_format = datetime.datetime.strptime(message.get('time'), "%Y%m%d%H%M%S")
                                 except Exception:
-                                    stime = None
+                                    time_format = None
                                 ml.mtq_code = message.get('code')
                                 ml.mtq_msg = message.get('msg')
-                                ml.mtq_time = stime
+                                ml.mtq_time = time_format
+                                ml.mtq_stime = message.get('time')
                                 ml.callback_id = callback_id
                                 db.session.add(ml)
                         try:
@@ -98,7 +99,7 @@ def report_query():
             print(len(tasks))
             loop.run_until_complete(asyncio.wait(tasks))
             for task in tasks:
-                print('Task ret: ', task.result())
+                print('Task report_query ret: ', task.result())
         except Exception as e:
             print("report_query error-{}".format(e))
 
@@ -196,7 +197,7 @@ def handle_apply():
             loop.run_until_complete(asyncio.wait(tasks))
 
             for task in tasks:
-                print('Task ret: ', task.result())
+                print('Task handle_apply ret: ', task.result())
         except Exception as e:
             for tq in tqs:
                 tq.run_batch = None
@@ -299,7 +300,7 @@ def send_sms():
             loop.run_until_complete(asyncio.wait(tasks))
 
             for task in tasks:
-                print('Task ret: ', task.result())
+                print('Task send_sms ret: ', task.result())
         except Exception as e:
             for tq in tqs:
                 tq.run_batch = None
@@ -345,8 +346,8 @@ def report_sms():
                     return "{} no messages to report".format(tq.queue_no)
 
                 data = [{"taskid": ml.task_no, "apply_no": ml.apply_no, "code": ml.mtq_code,
-                         "msg": ml.mtq_msg, "mobile": ml.mobile, "time":
-                             ml.mtq_time.strftime("%Y%m%d%H%M%S") if ml.mtq_time is not None else None} for ml in mls]
+                         "msg": ml.mtq_msg, "mobile": ml.mobile, "time": ml.mtq_stime} for ml in mls]
+                print("report data count: ", len(data))
                 from main.utils.commons import common_post
                 result = common_post("127.0.0.1", "5000", "/api/v1.0/report/push", json.dumps(data))
                 if result == "SUCCESS":  # 成功
@@ -394,7 +395,7 @@ def report_sms():
             loop.run_until_complete(asyncio.wait(tasks))
 
             for task in tasks:
-                print('Task ret: ', task.result())
+                print('Task report_sms ret: ', task.result())
         except Exception as e:
             for tq in tqs:
                 tq.run_batch = None

@@ -31,6 +31,11 @@ def mainsleep():
 
 @api.route('/report/push', methods=["POST"])
 def report_push():
-    print(request.get_data())
+    try:
+        req_dict = request.get_json()
+        print("len: ", len(req_dict))
+    except Exception as e:
+        current_app.logger.info(e)
+        return "ERROR"
     return "SUCCESS"
 

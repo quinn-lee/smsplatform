@@ -165,6 +165,7 @@ class MessageLog(db.Model):
     mtq_code = db.Column(db.String(128))  # 查询接口返回的状态码
     mtq_msg = db.Column(db.String(256))  # 查询接口返回的状态描述
     mtq_time = db.Column(db.DateTime)  # 查询接口返回的接收时间
+    mtq_stime = db.Column(db.String(30))  # 查询接口返回的接收时间字符串格式
     created_at = db.Column(db.DateTime, index=True, default=datetime.datetime.now)  # 创建时间
     updated_at = db.Column(db.DateTime, index=True, default=datetime.datetime.now)  # 修改时间
 
