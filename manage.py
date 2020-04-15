@@ -3,7 +3,7 @@
 
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from main import app, db
+from main import app, db, scheduler
 from flask_script import Shell
 from main.models import User, UserLog, MessageLog, MessageTask, TaskQueue
 from main.libs.smsapi import SmsApi
@@ -21,7 +21,7 @@ manager.add_command('db', MigrateCommand)
 
 def make_shell_context():
     return dict(app=app, db=db, User=User, UserLog=UserLog, SmsApi=SmsApi, MessageTask=MessageTask,
-                MessageLog=MessageLog, TaskQueue=TaskQueue)
+                MessageLog=MessageLog, TaskQueue=TaskQueue, scheduler=scheduler)
 
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
