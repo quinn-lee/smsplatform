@@ -8,4 +8,5 @@ api = Blueprint("api_1_0", __name__)
 import main.api_1_0.session
 import main.api_1_0.views
 import main.api_1_0.sms
+import main.api_1_0.search
 
