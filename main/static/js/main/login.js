@@ -43,7 +43,7 @@ $(document).ready(function() {
             success: function (data) {
                 if (data.errno == "0") {
                     // 登录成功，跳转到主页
-                    location.href = "/";
+                    location.href = "/search.html";
                 }
                 else {
                     // 其他错误信息，在页面中展示
