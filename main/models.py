@@ -166,6 +166,7 @@ class MessageLog(db.Model):
     mtq_msg = db.Column(db.String(256))  # 查询接口返回的状态描述
     mtq_time = db.Column(db.DateTime)  # 查询接口返回的接收时间
     mtq_stime = db.Column(db.String(30))  # 查询接口返回的接收时间字符串格式
+    msg_status = db.Column(db.String(10))  # success or failure
     created_at = db.Column(db.DateTime, index=True, default=datetime.datetime.now)  # 创建时间
     updated_at = db.Column(db.DateTime, index=True, default=datetime.datetime.now)  # 修改时间
 
@@ -185,3 +186,22 @@ class TaskQueue(db.Model):
     start_handle_time = db.Column(db.DateTime)  # 第一次处理时间
     created_at = db.Column(db.DateTime, index=True, default=datetime.datetime.now)  # 创建时间
     updated_at = db.Column(db.DateTime, index=True, default=datetime.datetime.now)  # 修改时间
+
+
+# 机构表
+class MsgOrg(db.Model):
+    __tablename__ = "msgorg"
+    id = db.Column(db.Integer, primary_key=True)  # 主键
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # 所属用户
+    org_code = db.Column(db.String(256))  # 医院代码
+    org_name = db.Column(db.String(256))  # 医院名称
+    created_at = db.Column(db.DateTime, default=datetime.datetime.now)  # 创建时间
+
+
+# 类别表
+class MsgClass(db.Model):
+    __tablename__ = "msgclass"
+    id = db.Column(db.Integer, primary_key=True)  # 主键
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # 所属用户
+    send_class = db.Column(db.String(128))  # 短信类别
+    created_at = db.Column(db.DateTime, default=datetime.datetime.now)  # 创建时间

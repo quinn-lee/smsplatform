@@ -45,7 +45,7 @@ def report_query():
     """发送短信的定时查询任务"""
     with app.app_context():
         if os.path.exists('shutdown.txt'):
-            scheduler.shutdown()
+            return
         from main.models import TaskQueue, MessageLog, MessageTask
 
         async def query_sms(t):
@@ -70,6 +70,10 @@ def report_query():
                                     time_format = datetime.datetime.strptime(message.get('time'), "%Y%m%d%H%M%S")
                                 except Exception:
                                     time_format = None
+                                if message.get('code') == 'DELIVRD':
+                                    ml.msg_status = 'success'
+                                else:
+                                    ml.msg_status = 'failure'
                                 ml.mtq_code = message.get('code')
                                 ml.mtq_msg = message.get('msg')
                                 ml.mtq_time = time_format
@@ -108,8 +112,8 @@ def handle_apply():
     """HIS短信批量请求处理定时任务"""
     with app.app_context():
         if os.path.exists('shutdown.txt'):
-            scheduler.shutdown()
-        from main.models import TaskQueue, MessageLog, MessageTask
+            return
+        from main.models import TaskQueue, MessageLog, MessageTask, MsgClass, MsgOrg
         ts = time.strftime("%Y%m%d%H%M%S", time.localtime())
         tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == None,
                                      TaskQueue.task_type == 'apply').limit(5)
@@ -131,6 +135,12 @@ def handle_apply():
         async def process_tq(tq):
             try:
                 mt = MessageTask.query.filter_by(task_no=tq.queue_no).first()
+                if MsgOrg.query.filter_by(user_id=mt.user_id, org_code=mt.org_code).count() == 0:
+                    mo = MsgOrg(user_id=mt.user_id, org_code=mt.org_code, org_name=mt.org_name)
+                    db.session.add(mo)
+                if MsgClass.query.filter_by(user_id=mt.user_id, send_class=mt.send_class).count() == 0:
+                    mc = MsgClass(user_id=mt.user_id, send_class=mt.send_class)
+                    db.session.add(mc)
                 for i in range(0, len(mt.receivers), 1000):
                     mobiles = mt.receivers[i: i + 1000]
                     sequence = Sequence('some_no_seq')
@@ -216,7 +226,7 @@ def send_sms():
     """HIS短信批量请求处理定时任务"""
     with app.app_context():
         if os.path.exists('shutdown.txt'):
-            scheduler.shutdown()
+            return
         from main.models import TaskQueue, MessageLog, MessageTask
         ts = time.strftime("%Y%m%d%H%M%S", time.localtime())
         tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == None,
@@ -319,7 +329,7 @@ def report_sms():
     """推送HIS短信报告定时任务"""
     with app.app_context():
         if os.path.exists('shutdown.txt'):
-            scheduler.shutdown()
+            return
         from main.models import TaskQueue, MessageLog, MessageTask
         ts = time.strftime("%Y%m%d%H%M%S", time.localtime())
         tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == None,
