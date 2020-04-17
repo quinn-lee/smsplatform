@@ -68,7 +68,7 @@ def msg_statistics():
             return jsonify(errno="0", data=[{'filename': file_name}])
     except Exception as e:
         current_app.logger.error(e)
-        if request.args.get('action') == 'search':
+        if req_dict['action'] == 'search':
             errmsg = '数据查询错误'
         else:
             errmsg = '文件生成错误'
