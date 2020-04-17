@@ -94,6 +94,8 @@ $(document).ready(function() {
             return;
         }
         $("#notice").hide();
+        $("#export-form").hide();
+        $("#download").hide();
 		var data = {
             start_date: $("#start_date").val(),
             end_date: $("#end_date").val(),
@@ -128,6 +130,7 @@ $(document).ready(function() {
                     $( "#export-form" ).html(
                         $( "#qhTemplate" ).render( query )
                     );
+                    $("#export-form").show();
                 }
                 else {
                     alert(resp.errmsg);

@@ -36,6 +36,16 @@ def msg_statistics():
 
     res = db.session.query(MessageLog.org_code, MessageLog.org_name, MessageLog.send_class, MessageLog.msg_status,
                            func.count(MessageLog.id))
+    if req_dict.get('start_date') != '':
+        res = res.filter(MessageLog.created_at >= "{} 00:00:00".format(req_dict.get('start_date')))
+    if req_dict.get('end_date') != '':
+        res = res.filter(MessageLog.created_at <= "{} 23:59:59".format(req_dict.get('end_date')))
+    if req_dict.get('msg_org') != '':
+        res = res.filter(MessageLog.org_code == req_dict.get('msg_org'))
+    if req_dict.get('msg_class') != '':
+        res = res.filter(MessageLog.send_class == req_dict.get('msg_class'))
+    if req_dict.get('msg_status') != '':
+        res = res.filter(MessageLog.msg_status == req_dict.get('msg_status'))
     res = res.group_by(MessageLog.org_code, MessageLog.org_name, MessageLog.send_class, MessageLog.msg_status)
     data = [{'org_code': r[0], 'org_name': r[1], 'send_class': r[2], 'msg_status': r[3], 'count': r[4],
              'start_date': req_dict.get('start_date'), 'end_date': req_dict.get('end_date')} for r in res]
