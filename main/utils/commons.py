@@ -4,6 +4,10 @@ from werkzeug.routing import BaseConverter
 import time
 import hashlib
 import http.client
+import xlsxwriter
+import sys
+import importlib
+importlib.reload(sys)
 
 
 # 定义正则转换器
@@ -14,6 +18,28 @@ class ReConverter(BaseConverter):
         super(ReConverter, self).__init__(url_map)
         # 保存正则表达式
         self.regex = regex
+
+
+# 写入Excel文件
+class Excel(object):
+    # 初始化，设置文件名
+    def __init__(self, name):
+        self.book = xlsxwriter.Workbook(name)
+        self.sheet = self.book.add_worksheet()
+
+    # 写入列名
+    def write_colume_name(self, colums_name):
+        for i in range(0, len(colums_name)):
+            self.sheet.write(0, i, colums_name[i])
+
+    # 写入数据
+    def write_content(self, row_num, data):
+        for i in range(0, len(data)):
+            self.sheet.write(row_num, i, data[i])
+
+    # 关闭文件
+    def close(self):
+        self.book.close()
 
 
 # 带token认证的post
