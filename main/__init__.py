@@ -485,5 +485,5 @@ def create_app(environment):
     return app
 
 
-app = create_app("production")
+app = create_app("development")
 

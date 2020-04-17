@@ -80,6 +80,20 @@ $(document).ready(function() {
 
 	$("#search-form").submit(function(e){
 		e.preventDefault();
+        if(!$("#start_date").val() || !$("#end_date").val()){
+            $("#notice").html("统计必须输入起止时间！");
+            $("#notice").show();
+            return;
+        };
+        sd = new Date($("#start_date").val().replace(/-/,"/"));
+        ed = new Date($("#end_date").val().replace(/-/,"/"));
+        days = Math.floor((ed - sd) / (24 * 3600 * 1000));
+        if(days > 31){
+            $("#notice").html("时间间隔不能超过1个月！");
+            $("#notice").show();
+            return;
+        }
+        $("#notice").hide();
 		var data = {
             start_date: $("#start_date").val(),
             end_date: $("#end_date").val(),
