@@ -7,6 +7,8 @@ from main.utils.response_code import RET
 from sqlalchemy.sql import func
 from main.utils.commons import Excel
 import time
+from main.libs.smsapi import SmsApi
+import json
 
 
 @api.route("/msg_orgs", methods=["GET"])
@@ -149,3 +151,13 @@ def fare_details():
         return jsonify(errno="1", errmsg=errmsg)
 
 
+@api.route("/balance", methods=["GET"])
+def balance():
+    try:
+        smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
+        result = json.loads(smsapi.balance())
+        if result.get('code') != "0":
+            raise Exception(result.get('msg'))
+        return jsonify(errno=result.get('code'), data=[{'balance': result.get('data').get('balance')}])
+    except Exception as e:
+        current_app.logger.error(e)
