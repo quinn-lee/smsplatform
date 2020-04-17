@@ -15,12 +15,12 @@ $(document).ready(function() {
         email = $("#email").val();
         passwd = $("#password").val();
         if (!email) {
-            $("#login-err h4").html("请填写正确的邮箱！");
+            $("#login-err").html("请填写正确的邮箱！");
             $("#login-err").show();
             return;
         } 
         if (!passwd) {
-            $("#login-err h4").html("请填写密码!");
+            $("#login-err").html("请填写密码!");
             $("#login-err").show();
             return;
         }
@@ -47,7 +47,7 @@ $(document).ready(function() {
                 }
                 else {
                     // 其他错误信息，在页面中展示
-                    $("#login-err h4").html(data.errmsg);
+                    $("#login-err").html(data.errmsg);
                     $("#login-err").show();
                 }
             }
