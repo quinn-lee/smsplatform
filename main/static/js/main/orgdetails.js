@@ -25,15 +25,6 @@ $(document).ready(function() {
     $("#org_code").val(orgCode)
     $("#org_name").val(orgName)
 
-    $.get("/api/v1.0/session", function(resp){
-        if ("4101" == resp.errno) {
-            // 用户未登录
-            location.href = "/login.html";
-        } else {
-        	$("#login-name").html(resp.data['name']);
-        }
-    });
-
 
     //提示信息
     $.fn.dataTable.ext.errMode = 'none';
@@ -192,28 +183,6 @@ $(document).ready(function() {
             }
         })
         .api();
-
-
-    $("#logout a").click(function(e){
-    	$.ajax({
-            url:"/api/v1.0/session",
-            type:"delete",
-            contentType: "application/json",
-            dataType: "json",
-            headers:{
-                "X-CSRFToken":getCookie("csrf_token")
-            },
-            success: function (resp) {
-                if (resp.errno == "0") {
-                    location.href = "/login.html";
-                }
-                else {
-                	location.href = "/login.html";
-                }
-            }
-        });
-    })
-
 
     $("#export-form").submit(function(e){
         e.preventDefault();

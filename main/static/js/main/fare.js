@@ -5,15 +5,6 @@ function getCookie(name) {
 
 $(document).ready(function() {
 
-    $.get("/api/v1.0/session", function(resp){
-        if ("4101" == resp.errno) {
-            // 用户未登录
-            location.href = "/login.html";
-        } else {
-        	$("#login-name").html(resp.data['name']);
-        }
-    });
-
 	$.datetimepicker.setLocale('ch');
     $('.datepicker').datetimepicker({
         i18n:{
@@ -32,51 +23,6 @@ $(document).ready(function() {
          format:'Y/m/d'
     });
 
-    $.get("/api/v1.0/msg_orgs", function (resp) {
-        if (resp.errno == "0") {
-            var orgs = resp.data;
-            $( "#msgorg" ).html(
-				$( "#orgTemplate" ).render( orgs )
-			);
-
-        } else {
-            alert(resp.errmsg);
-        }
-
-    }, "json");
-
-    $.get("/api/v1.0/msg_classes", function (resp) {
-        if (resp.errno == "0") {
-            var classes = resp.data;
-            $( "#msgclass" ).html(
-				$( "#classTemplate" ).render( classes )
-			);
-
-        } else {
-            alert(resp.errmsg);
-        }
-
-    }, "json");
-
-    $("#logout a").click(function(e){
-    	$.ajax({
-            url:"/api/v1.0/session",
-            type:"delete",
-            contentType: "application/json",
-            dataType: "json",
-            headers:{
-                "X-CSRFToken":getCookie("csrf_token")
-            },
-            success: function (resp) {
-                if (resp.errno == "0") {
-                    location.href = "/login.html";
-                }
-                else {
-                	location.href = "/login.html";
-                }
-            }
-        });
-    })
 
 	$("#search-form").submit(function(e){
 		e.preventDefault();
