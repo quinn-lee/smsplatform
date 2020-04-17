@@ -1,4 +1,5 @@
 # coding: utf-8
+import datetime
 
 
 class Config(object):
@@ -8,6 +9,8 @@ class Config(object):
 
     SQLALCHEMY_DATABASE_URI = "postgresql://smsp:fuyuan@localhost:5432/smsp_db"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+    SEND_FILE_MAX_AGE_DEFAULT = datetime.timedelta(seconds=1)  # 前端静态页面最大缓存时间
 
 
 class DevelopmentConfig(Config):

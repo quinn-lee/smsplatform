@@ -37,7 +37,8 @@ def msg_statistics():
     res = db.session.query(MessageLog.org_code, MessageLog.org_name, MessageLog.send_class, MessageLog.msg_status,
                            func.count(MessageLog.id))
     res = res.group_by(MessageLog.org_code, MessageLog.org_name, MessageLog.send_class, MessageLog.msg_status)
-    data = [{'org_code': r[0], 'org_name': r[1], 'send_class': r[2], 'msg_status': r[3], 'count': r[4]} for r in res]
+    data = [{'org_code': r[0], 'org_name': r[1], 'send_class': r[2], 'msg_status': r[3], 'count': r[4],
+             'start_date': req_dict.get('start_date'), 'end_date': req_dict.get('end_date')} for r in res]
     print(data)
     if req_dict['action'] == 'search':  # 搜索
         return jsonify(errno="0", data=data, query=[req_dict])

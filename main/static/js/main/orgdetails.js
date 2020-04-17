@@ -3,7 +3,22 @@ function getCookie(name) {
     return r ? r[1] : undefined;
 }
 
+// 解析url中的查询字符串
+function decodeQuery(){
+    var search = decodeURI(document.location.search);
+    return search.replace(/(^\?)/, '').split('&').reduce(function(result, item){
+        values = item.split('=');
+        result[values[0]] = values[1];
+        return result;
+    }, {});
+}
+
 $(document).ready(function() {
+
+    var queryData = decodeQuery();
+    var startDate = queryData["start_date"];
+    var endDate = queryData["end_date"];
+    var orgCode = queryData["org_code"];
 
     $.get("/api/v1.0/session", function(resp){
         if ("4101" == resp.errno) {
@@ -74,7 +89,10 @@ $(document).ready(function() {
                 param.pageSize = data.length;//页面显示记录条数，在页面显示每页显示多少项的时候
                 param.start = data.start;//开始的记录序号
                 param.currentPage = (data.start / data.length) + 1;//当前页码
-                param.action = 'search'
+                param.action = 'search';
+                param.org_code = orgCode;
+                param.start_date = startDate;
+                param.end_date = endDate;
                 //console.log(param);
                 //ajax请求数据
                 $.ajax({

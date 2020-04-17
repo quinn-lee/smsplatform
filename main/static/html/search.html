@@ -31,53 +31,6 @@
       </div>
       <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
         <ul class="navbar-nav navbar-nav-right">
-          <!--
-          <li class="nav-item dropdown mr-1">
-            <a class="nav-link count-indicator dropdown-toggle d-flex justify-content-center align-items-center" id="messageDropdown" href="#" data-toggle="dropdown">
-              <i class="mdi mdi-message-text mx-0"></i>
-              <span class="count"></span>
-            </a>
-            <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="messageDropdown">
-              <p class="mb-0 font-weight-normal float-left dropdown-header">Messages</p>
-              <a class="dropdown-item">
-                <div class="item-thumbnail">
-                    <img src="/static/images/faces/face4.jpg" alt="image" class="profile-pic">
-                </div>
-                <div class="item-content flex-grow">
-                  <h6 class="ellipsis font-weight-normal">David Grey
-                  </h6>
-                  <p class="font-weight-light small-text text-muted mb-0">
-                    The meeting is cancelled
-                  </p>
-                </div>
-              </a>
-              <a class="dropdown-item">
-                <div class="item-thumbnail">
-                    <img src="/static/images/faces/face2.jpg" alt="image" class="profile-pic">
-                </div>
-                <div class="item-content flex-grow">
-                  <h6 class="ellipsis font-weight-normal">Tim Cook
-                  </h6>
-                  <p class="font-weight-light small-text text-muted mb-0">
-                    New product launch
-                  </p>
-                </div>
-              </a>
-              <a class="dropdown-item">
-                <div class="item-thumbnail">
-                    <img src="/static/images/faces/face3.jpg" alt="image" class="profile-pic">
-                </div>
-                <div class="item-content flex-grow">
-                  <h6 class="ellipsis font-weight-normal"> Johnson
-                  </h6>
-                  <p class="font-weight-light small-text text-muted mb-0">
-                    Upcoming board meeting
-                  </p>
-                </div>
-              </a>
-            </div>
-          </li>
-          -->
           <li class="nav-item nav-profile dropdown">
             <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
               <span class="nav-profile-name" id="login-name"></span>
@@ -127,7 +80,7 @@
                       搜索
                     </p>
                     <div class="row">
-                      <div class="col-md-6">
+                      <div class="col-md-4">
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label">发送时间起</label>
                           <div class="col-sm-9">
@@ -135,7 +88,7 @@
                           </div>
                         </div>
                       </div>
-                      <div class="col-md-6">
+                      <div class="col-md-4">
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label">止</label>
                           <div class="col-sm-9">
@@ -143,9 +96,7 @@
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-md-6">
+                      <div class="col-md-4">
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label">医院机构</label>
                           <div class="col-sm-9">
@@ -157,7 +108,9 @@
                           </div>
                         </div>
                       </div>
-                      <div class="col-md-6">
+                    </div>
+                    <div class="row">
+                      <div class="col-md-4">
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label">短信类别</label>
                           <div class="col-sm-9">
@@ -169,9 +122,7 @@
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-md-6">
+                      <div class="col-md-4">
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label">短信状态</label>
                           <div class="col-sm-9">
@@ -183,7 +134,7 @@
                           </div>
                         </div>
                       </div>
-                      <div class="col-md-6">
+                      <div class="col-md-4">
                         <div class="form-group row">
                           <button type="submit" class="btn btn-primary mr-2">搜索</button>
                         </div>
@@ -239,7 +190,7 @@
                       </tbody>
                       <script id="trTemplate" type="text/x-jsrender">
                         <tr>
-                          <td>{{>org_code}}</td>
+                          <td><a href="/orgdetails.html?org_code={{>org_code}}&start_date={{>start_date}}&end_date={{>end_date}}">{{>org_code}}</a></td>
                           <td>{{>org_name}}</td>
                           <td>{{>send_class}}</td>
                           <td><label class="badge">{{>msg_status}}</label></td>
