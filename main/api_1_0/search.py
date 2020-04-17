@@ -34,37 +34,45 @@ def msg_statistics():
         current_app.logger.info(e)
         return jsonify(errno=RET.NOTJSON, errmsg="参数非Json格式")
 
-    res = db.session.query(MessageLog.org_code, MessageLog.org_name, MessageLog.send_class, MessageLog.msg_status,
-                           func.count(MessageLog.id))
-    if req_dict.get('start_date') != '':
-        res = res.filter(MessageLog.created_at >= "{} 00:00:00".format(req_dict.get('start_date')))
-    if req_dict.get('end_date') != '':
-        res = res.filter(MessageLog.created_at <= "{} 23:59:59".format(req_dict.get('end_date')))
-    if req_dict.get('msg_org') != '':
-        res = res.filter(MessageLog.org_code == req_dict.get('msg_org'))
-    if req_dict.get('msg_class') != '':
-        res = res.filter(MessageLog.send_class == req_dict.get('msg_class'))
-    if req_dict.get('msg_status') != '':
-        res = res.filter(MessageLog.msg_status == req_dict.get('msg_status'))
-    res = res.group_by(MessageLog.org_code, MessageLog.org_name, MessageLog.send_class, MessageLog.msg_status)
-    data = [{'org_code': r[0], 'org_name': r[1], 'send_class': r[2], 'msg_status': r[3], 'count': r[4],
-             'start_date': req_dict.get('start_date'), 'end_date': req_dict.get('end_date')} for r in res]
-    print(data)
-    if req_dict['action'] == 'search':  # 搜索
-        return jsonify(errno="0", data=data, query=[req_dict])
-    else:  # 导出
-        file_name = 'statistics{}.xlsx'.format(str(int(round(time.time() * 1000))))
-        file_path = 'main/static/excels/{}'.format(file_name)
-        colums_name = ['医院代码', '医院名称', '短信类别', '短信状态', '数量']
+    try:
+        res = db.session.query(MessageLog.org_code, MessageLog.org_name, MessageLog.send_class, MessageLog.msg_status,
+                               func.count(MessageLog.id))
+        if req_dict.get('start_date') != '':
+            res = res.filter(MessageLog.created_at >= "{} 00:00:00".format(req_dict.get('start_date')))
+        if req_dict.get('end_date') != '':
+            res = res.filter(MessageLog.created_at <= "{} 23:59:59".format(req_dict.get('end_date')))
+        if req_dict.get('msg_org') != '':
+            res = res.filter(MessageLog.org_code == req_dict.get('msg_org'))
+        if req_dict.get('msg_class') != '':
+            res = res.filter(MessageLog.send_class == req_dict.get('msg_class'))
+        if req_dict.get('msg_status') != '':
+            res = res.filter(MessageLog.msg_status == req_dict.get('msg_status'))
+        res = res.group_by(MessageLog.org_code, MessageLog.org_name, MessageLog.send_class, MessageLog.msg_status)
+        data = [{'org_code': r[0], 'org_name': r[1], 'send_class': r[2], 'msg_status': r[3], 'count': r[4],
+                 'start_date': req_dict.get('start_date'), 'end_date': req_dict.get('end_date')} for r in res]
+        print(data)
+        if req_dict['action'] == 'search':  # 搜索
+            return jsonify(errno="0", data=data, query=[req_dict])
+        else:  # 导出
+            file_name = 'statistics{}.xlsx'.format(str(int(round(time.time() * 1000))))
+            file_path = 'main/static/excels/{}'.format(file_name)
+            colums_name = ['医院代码', '医院名称', '短信类别', '短信状态', '数量']
 
-        book = Excel(file_path)
-        book.write_colume_name(colums_name)
-        i = 1
-        for row in res:
-            book.write_content(i, row)
-            i += 1
-        book.close()
-        return jsonify(errno="0", data=[{'filename': file_name}])
+            book = Excel(file_path)
+            book.write_colume_name(colums_name)
+            i = 1
+            for row in res:
+                book.write_content(i, row)
+                i += 1
+            book.close()
+            return jsonify(errno="0", data=[{'filename': file_name}])
+    except Exception as e:
+        current_app.logger.error(e)
+        if request.args.get('action') == 'search':
+            errmsg = '数据查询错误'
+        else:
+            errmsg = '文件生成错误'
+        return jsonify(errno="1", errmsg=errmsg)
 
 
 @api.route("/org_details")

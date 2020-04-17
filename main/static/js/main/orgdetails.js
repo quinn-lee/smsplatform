@@ -108,13 +108,17 @@ $(document).ready(function() {
                     data: param, //传入组装的参数
                     dataType: "json",
                     success: function (result) {
-                        var returnData = {};
-                        returnData.draw = data.startRow;//这里直接自行返回了draw计数器,应该由后台返回
-                        returnData.recordsTotal = result.totalRows;//返回数据全部记录
-                        returnData.recordsFiltered = result.totalRows;//后台不实现过滤功能，每次查询均视作全部结果
-                        returnData.data = result.data ;//返回的数据列表
-                        //此时的数据需确保正确无误，异常判断应在执行此回调前自行处理完毕
-                        callback(returnData);
+                        if(result.errno == "0") {
+                            var returnData = {};
+                            returnData.draw = data.startRow;//这里直接自行返回了draw计数器,应该由后台返回
+                            returnData.recordsTotal = result.totalRows;//返回数据全部记录
+                            returnData.recordsFiltered = result.totalRows;//后台不实现过滤功能，每次查询均视作全部结果
+                            returnData.data = result.data ;//返回的数据列表
+                            //此时的数据需确保正确无误，异常判断应在执行此回调前自行处理完毕
+                            callback(returnData);
+                        } else {
+                            alert(result.errmsg)
+                        }
                     }
                 });
             },
