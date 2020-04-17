@@ -160,7 +160,9 @@
                         <input type="hidden" name="qmsg_class" id="qmsg_class" value="{{>msg_class}}"/>
                         <input type="hidden" name="qmsg_status" id="qmsg_status" value="{{>msg_status}}"/>
                         <div class="form-group row">
-                          <button type="submit" class="btn btn-success mr-2">导出</button>
+                          <button type="submit" class="btn btn-outline-info btn-icon-text">
+                            <i class="mdi mdi-download btn-icon-append"></i>导出到文件             
+                          </button>
                         </div>
                       </script>
                     </div>
@@ -168,7 +170,7 @@
                     </div>
                     <script id="dTemplate" type="text/x-jsrender">
                       <div class="font-weight-light">
-                        请点击 <a href="/static/excels/{{>filename}}" class="text-primary">下载Excel文件</a>
+                        <a href="/static/excels/{{>filename}}" class="btn btn-outline-danger btn-icon-text"><i class="mdi mdi-file-excel btn-icon-prepend"></i>下载Excel文件</a>
                       </div>
                     </script>
                     <div class="col-md-4 align-items-center text-danger" id="prompt" style="display: none;">

@@ -208,6 +208,7 @@ $(document).ready(function() {
     $("#export-form").submit(function(e){
         e.preventDefault();
         $("#prompt").show();
+        $("#download").hide();
         var data = {
             action: 'export'
         };
@@ -229,6 +230,7 @@ $(document).ready(function() {
                     $( "#download" ).html(
                         $( "#dTemplate" ).render( filename )
                     );
+                    $("#download").show();
                 }
                 else {
                     alert(resp.errmsg);

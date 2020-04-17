@@ -139,6 +139,7 @@ $(document).ready(function() {
     $("#export-form").submit(function(e){
         e.preventDefault();
         $("#prompt").show();
+        $("#download").hide();
         var data = {
             start_date: $("#qstart_date").val(),
             end_date: $("#qend_date").val(),
@@ -165,6 +166,7 @@ $(document).ready(function() {
                     $( "#download" ).html(
                         $( "#dTemplate" ).render( filename )
                     );
+                    $("#download").show();
                 }
                 else {
                     alert(resp.errmsg);
