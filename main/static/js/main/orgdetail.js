@@ -127,14 +127,14 @@ $(document).ready(function() {
                 {'data': 'mtq_msg',
                     render: function (data, type, full) {
                         if(data != null){
-                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,8) + "</a>";
+                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,10) + "</a>";
                         }
                     }
                 },
                 {'data': 'send_class',
                     render: function (data, type, full) {
                         if(data != null){
-                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,8) + "</a>";
+                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,10) + "</a>";
                         }
                     }
                 },
