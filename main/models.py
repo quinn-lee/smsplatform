@@ -170,6 +170,54 @@ class MessageLog(db.Model):
     created_at = db.Column(db.DateTime, index=True, default=datetime.datetime.now)  # 创建时间
     updated_at = db.Column(db.DateTime, index=True, default=datetime.datetime.now)  # 修改时间
 
+    def to_json(self):
+        json_m = {
+            'id': self.id,
+            'message_id': self.message_id,
+            'callback_id': self.callback_id,
+            'user_id': self.user_id,
+            'messagetask_id': self.messagetask_id,
+            'task_no': self.task_no,
+            'apply_no': self.apply_no,
+            'org_code': self.org_code,
+            'org_name': self.org_name,
+            'send_class': self.send_class,
+            'send_name': self.send_name,
+            'msgcontent': self.msgcontent,
+            'send_date': None if self.send_date is None else self.send_date.strftime("%Y%m%d"),
+            'patient_id': self.patient_id,
+            'org_form_no': self.org_form_no,
+            'name': self.name,
+            'age': self.age,
+            'id_no': self.id_no,
+            'mobile': self.mobile,
+            'mt_code': self.mt_code,
+            'mt_msg': self.mt_msg,
+            'mt_taskid': self.mt_taskid,
+            'mtq_code': self.mtq_code,
+            'mtq_msg': self.mtq_msg,
+            'mtq_time': self.mtq_time,
+            'mtq_stime': self.mtq_stime,
+            'msg_status': self.msg_status
+        }
+
+        return json_m
+
+    def to_arr(self):
+        arr = [
+            self.name,
+            self.id_no,
+            self.mobile,
+            self.mtq_stime,
+            self.mtq_msg,
+            self.send_class,
+            self.send_name,
+            self.msgcontent,
+            None if self.send_date is None else self.send_date.strftime("%Y%m%d")
+        ]
+
+        return arr
+
 
 # 批处理任务表
 class TaskQueue(db.Model):
