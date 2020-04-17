@@ -207,6 +207,7 @@ $(document).ready(function() {
 
     $("#export-form").submit(function(e){
         e.preventDefault();
+        $("#prompt").show();
         var data = {
             action: 'export'
         };
@@ -222,6 +223,7 @@ $(document).ready(function() {
                 "X-CSRFToken":getCookie("csrf_token")
             },
             success: function (resp) {
+                $("#prompt").hide();
                 if (resp.errno == "0") {
                     var filename = resp.data;
                     $( "#download" ).html(

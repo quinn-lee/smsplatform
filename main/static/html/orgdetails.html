@@ -92,6 +92,10 @@
                         请点击 <a href="/static/excels/{{>filename}}" class="text-primary">下载Excel文件</a>
                       </div>
                     </script>
+                    <div class="col-md-4 align-items-center text-danger" id="prompt" style="display: none;">
+                        <strong>文件生成中，请稍等.</strong>
+                        <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>
+                    </div>
                   </div>
                   <div class="table-responsive">
                     <table class="table table-striped" id="table_details">

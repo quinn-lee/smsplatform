@@ -124,6 +124,7 @@ $(document).ready(function() {
 
     $("#export-form").submit(function(e){
         e.preventDefault();
+        $("#prompt").show();
         var data = {
             start_date: $("#qstart_date").val(),
             end_date: $("#qend_date").val(),
@@ -144,6 +145,7 @@ $(document).ready(function() {
                 "X-CSRFToken":getCookie("csrf_token")
             },
             success: function (resp) {
+                $("#prompt").hide();
                 if (resp.errno == "0") {
                     var filename = resp.data;
                     $( "#download" ).html(
