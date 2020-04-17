@@ -161,3 +161,21 @@ def balance():
         return jsonify(errno=result.get('code'), data=[{'balance': result.get('data').get('balance')}])
     except Exception as e:
         current_app.logger.error(e)
+        return jsonify(errno="0", errmsg=str(e))
+
+
+@api.route("/message", methods=["GET"])
+def message():
+    try:
+        smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
+        result = json.loads(smsapi.balance())
+        if result.get('code') != "0":
+            raise Exception(result.get('msg'))
+        num = result.get('data').get('balance')
+        if int(num) >= 10000:
+            raise Exception("短信剩余条数不用提示")
+        return jsonify(errno="0", data=[{'mtitle': '余额预警',
+                                         'mcontent': "当前短信剩余条数为{}".format(num)}])
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno="1", errmsg=str(e))
