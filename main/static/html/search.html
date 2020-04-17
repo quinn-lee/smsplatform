@@ -79,7 +79,7 @@
                     <div class="row">
                       <div class="col-md-4">
                         <div class="form-group row">
-                          <label class="col-sm-3 col-form-label">发送时间起</label>
+                          <label class="col-sm-3 col-form-label">时间从：</label>
                           <div class="col-sm-9">
                             <input type="text" class="form-control datepicker" name="start_date" id="start_date"/>
                           </div>
@@ -87,7 +87,7 @@
                       </div>
                       <div class="col-md-4">
                         <div class="form-group row">
-                          <label class="col-sm-3 col-form-label">止</label>
+                          <label class="col-sm-3 col-form-label">到：</label>
                           <div class="col-sm-9">
                             <input type="text" class="form-control datepicker" name="end_date" id="end_date"/>
                           </div>
@@ -95,7 +95,7 @@
                       </div>
                       <div class="col-md-4">
                         <div class="form-group row">
-                          <label class="col-sm-3 col-form-label">医院机构</label>
+                          <label class="col-sm-3 col-form-label">医院机构：</label>
                           <div class="col-sm-9">
                             <select class="form-control" id="msgorg" name='org_code'>
                             </select>
@@ -109,7 +109,7 @@
                     <div class="row">
                       <div class="col-md-4">
                         <div class="form-group row">
-                          <label class="col-sm-3 col-form-label">短信类别</label>
+                          <label class="col-sm-3 col-form-label">短信类别：</label>
                           <div class="col-sm-9">
                             <select class="form-control" id="msgclass" name='send_class'>
                             </select>
@@ -121,7 +121,7 @@
                       </div>
                       <div class="col-md-4">
                         <div class="form-group row">
-                          <label class="col-sm-3 col-form-label">短信状态</label>
+                          <label class="col-sm-3 col-form-label">短信状态：</label>
                           <div class="col-sm-9">
                             <select class="form-control" name='msg_status' id="msg_status">
                               <option value=''></option>
@@ -193,7 +193,7 @@
                       </tbody>
                       <script id="trTemplate" type="text/x-jsrender">
                         <tr>
-                          <td><a href="/orgdetails.html?org_code={{>org_code}}&start_date={{>start_date}}&end_date={{>end_date}}">{{>org_code}}</a></td>
+                          <td><a href="/orgdetails.html?org_code={{>org_code}}&start_date={{>start_date}}&end_date={{>end_date}}&org_name={{>org_name}}">{{>org_code}}</a></td>
                           <td>{{>org_name}}</td>
                           <td>{{>send_class}}</td>
                           <td><label class="badge">{{>msg_status}}</label></td>

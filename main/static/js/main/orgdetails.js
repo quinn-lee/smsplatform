@@ -19,6 +19,11 @@ $(document).ready(function() {
     var startDate = queryData["start_date"];
     var endDate = queryData["end_date"];
     var orgCode = queryData["org_code"];
+    var orgName = queryData["org_name"]
+    $("#start_date").val(startDate)
+    $("#end_date").val(endDate)
+    $("#org_code").val(orgCode)
+    $("#org_name").val(orgName)
 
     $.get("/api/v1.0/session", function(resp){
         if ("4101" == resp.errno) {
@@ -93,6 +98,7 @@ $(document).ready(function() {
                 param.org_code = orgCode;
                 param.start_date = startDate;
                 param.end_date = endDate;
+                param.org_name = orgName;
                 //console.log(param);
                 //ajax请求数据
                 $.ajax({
@@ -209,15 +215,17 @@ $(document).ready(function() {
         e.preventDefault();
         $("#prompt").show();
         $("#download").hide();
-        var data = {
-            action: 'export'
-        };
-        // 将data转为json字符串
-        var jsonData = JSON.stringify(data);
+        var param = {};
+        param.action = 'export';
+        param.org_code = $("#org_code").val();
+        param.start_date = $("#start_date").val();
+        param.end_date = $("#end_date").val();
+        param.org_name = $("#org_name").val();
+
         $.ajax({
             url:"/api/v1.0/org_details",
             type:"get",
-            data: jsonData,
+            data: param,
             contentType: "application/json",
             dataType: "json",
             headers:{

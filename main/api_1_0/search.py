@@ -69,23 +69,39 @@ def msg_statistics():
 
 @api.route("/org_details")
 def org_details():
-    mls = MessageLog.query
-    if request.args.get('action') == 'search':  # 搜索
-        pagination = mls.paginate(int(request.args.get('currentPage')), per_page=int(request.args.get('pageSize')))
-        data = [ml.to_json() for ml in pagination.items]
-        return jsonify(errno="0", data=data, totalRows=len(mls.all()))
-    else:  # 导出
-        file_name = 'details{}.xlsx'.format(str(int(round(time.time() * 1000))))
-        file_path = 'main/static/excels/{}'.format(file_name)
-        colums_name = ['姓名', '证件号码', '手机号', '接收时间', '接收状态', '短信类别', '发送人', '短信内容', '发送日期']
+    try:
+        mls = MessageLog.query
+        if request.args.get('start_date') != '':
+            mls = mls.filter(MessageLog.created_at >= "{} 00:00:00".format(request.args.get('start_date')))
+        if request.args.get('end_date') != '':
+            mls = mls.filter(MessageLog.created_at <= "{} 23:59:59".format(request.args.get('end_date')))
+        if request.args.get('org_code') != '':
+            mls = mls.filter(MessageLog.org_code == request.args.get('org_code'))
+        if request.args.get('org_name') != '':
+            mls = mls.filter(MessageLog.org_name == request.args.get('org_name'))
+        if request.args.get('action') == 'search':  # 搜索
+            pagination = mls.paginate(int(request.args.get('currentPage')), per_page=int(request.args.get('pageSize')))
+            data = [ml.to_json() for ml in pagination.items]
+            return jsonify(errno="0", data=data, totalRows=len(mls.all()))
+        else:  # 导出
+            file_name = 'details{}.xlsx'.format(str(int(round(time.time() * 1000))))
+            file_path = 'main/static/excels/{}'.format(file_name)
+            colums_name = ['姓名', '证件号码', '手机号', '接收时间', '接收状态', '短信类别', '发送人', '短信内容', '发送日期']
 
-        book = Excel(file_path)
-        book.write_colume_name(colums_name)
-        i = 1
-        for row in mls.all():
-            book.write_content(i, row.to_arr())
-            i += 1
-        book.close()
-        return jsonify(errno="0", data=[{'filename': file_name}])
+            book = Excel(file_path)
+            book.write_colume_name(colums_name)
+            i = 1
+            for row in mls.all():
+                book.write_content(i, row.to_arr())
+                i += 1
+            book.close()
+            return jsonify(errno="0", data=[{'filename': file_name}])
+    except Exception as e:
+        current_app.logger.error(e)
+        if request.args.get('action') == 'search':
+            errmsg = '数据查询错误'
+        else:
+            errmsg = '文件生成错误'
+        return jsonify(errno="1", errmsg=errmsg)
 
 
