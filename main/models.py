@@ -218,6 +218,16 @@ class MessageLog(db.Model):
 
         return arr
 
+    def to_arr2(self):
+        arr = [
+            self.name,
+            self.mobile,
+            self.mtq_stime,
+            self.mtq_msg
+        ]
+
+        return arr
+
 
 # 批处理任务表
 class TaskQueue(db.Model):

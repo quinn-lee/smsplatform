@@ -18,12 +18,10 @@ $(document).ready(function() {
     var queryData = decodeQuery();
     var startDate = queryData["start_date"];
     var endDate = queryData["end_date"];
-    var orgCode = queryData["org_code"];
-    var orgName = queryData["org_name"];
+    var msgStatus = queryData["msg_status"];
     $("#start_date").val(startDate)
     $("#end_date").val(endDate)
-    $("#org_code").val(orgCode)
-    $("#org_name").val(orgName)
+    $("#msg_status").val(msgStatus)
 
     $.get("/api/v1.0/session", function(resp){
         if ("4101" == resp.errno) {
@@ -95,15 +93,14 @@ $(document).ready(function() {
                 param.start = data.start;//开始的记录序号
                 param.currentPage = (data.start / data.length) + 1;//当前页码
                 param.action = 'search';
-                param.org_code = orgCode;
                 param.start_date = startDate;
                 param.end_date = endDate;
-                param.org_name = orgName;
+                param.msg_status = msgStatus;
                 //console.log(param);
                 //ajax请求数据
                 $.ajax({
                     type: "GET",
-                    url: "/api/v1.0/org_details",
+                    url: "/api/v1.0/fare_details",
                     cache: false, //禁用缓存
                     data: param, //传入组装的参数
                     dataType: "json",
@@ -124,69 +121,10 @@ $(document).ready(function() {
             },
             "columns": [   
                 //跟你要显示的字段是一一对应的。我这里只显示八列
-                {'data': 'name',
-                    render: function (data, type, full) {
-                        if(data != null){
-                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,6) + "</a>";
-                        }
-                    }
-                },
-                {'data': 'id_no',
-                    render: function (data, type, full) {
-                        if(data != null){
-                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,6)+ "**"+ data.substr(-4,4) + "</a>";
-                        }
-                    }
-                },
-                {'data': 'mobile',
-                    render: function (data, type, full) {
-                        if(data != null){
-                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,3)+ "**"+ data.substr(-3,3) + "</a>";
-                        }
-                    }
-                },
-                {'data': 'mtq_stime',
-                    render: function (data, type, full) {
-                        if(data != null){
-                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,8) + "</a>";
-                        }
-                    }
-                },
-                {'data': 'mtq_msg',
-                    render: function (data, type, full) {
-                        if(data != null){
-                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,10) + "</a>";
-                        }
-                    }
-                },
-                {'data': 'send_class',
-                    render: function (data, type, full) {
-                        if(data != null){
-                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,10) + "</a>";
-                        }
-                    }
-                },
-                {'data': 'send_name',
-                    render: function (data, type, full) {
-                        if(data != null){
-                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,6) + "</a>";
-                        }
-                    }
-                },
-                {'data': 'msgcontent',
-                    render: function (data, type, full) {
-                        if(data != null){
-                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,6) + "</a>";
-                        }
-                    }
-                },
-                {'data': 'send_date',
-                    render: function (data, type, full) {
-                        if(data != null){
-                            return "<a data-toggle='tooltip' title='" + data + "'> "+ data.substr(0,8) + "</a>";
-                        }
-                    }
-                },
+                {'data': 'name' },
+                {'data': 'mobile' },
+                {'data': 'mtq_stime'},
+                {'data': 'mtq_msg' },
             ],
             "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull)            {                    //列样式处理
             }
@@ -221,13 +159,12 @@ $(document).ready(function() {
         $("#download").hide();
         var param = {};
         param.action = 'export';
-        param.org_code = $("#org_code").val();
+        param.msg_status = $("#msg_status").val();
         param.start_date = $("#start_date").val();
         param.end_date = $("#end_date").val();
-        param.org_name = $("#org_name").val();
 
         $.ajax({
-            url:"/api/v1.0/org_details",
+            url:"/api/v1.0/fare_details",
             type:"get",
             data: param,
             contentType: "application/json",

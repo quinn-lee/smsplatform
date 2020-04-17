@@ -1,0 +1,99 @@
+function getCookie(name) {
+    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+    return r ? r[1] : undefined;
+}
+
+$(document).ready(function() {
+
+    $.get("/api/v1.0/session", function(resp){
+        if ("4101" == resp.errno) {
+            // 用户未登录
+            location.href = "/login.html";
+        } else {
+        	$("#login-name").html(resp.data['name']);
+        }
+    });
+
+	$.datetimepicker.setLocale('ch');
+    $('.datepicker').datetimepicker({
+        i18n:{
+          ch:{
+           months:[
+            '一月','二月','三月','四月',
+            '五月','六月','七月','八月',
+            '九月','十月','十一月','十二月',
+           ],
+           dayOfWeek:[
+            "日", "一", "二", "三", "四", "五", "六",
+           ]
+          }
+         },
+         timepicker:false,
+         format:'Y/m/d'
+    });
+
+    $.get("/api/v1.0/msg_orgs", function (resp) {
+        if (resp.errno == "0") {
+            var orgs = resp.data;
+            $( "#msgorg" ).html(
+				$( "#orgTemplate" ).render( orgs )
+			);
+
+        } else {
+            alert(resp.errmsg);
+        }
+
+    }, "json");
+
+    $.get("/api/v1.0/msg_classes", function (resp) {
+        if (resp.errno == "0") {
+            var classes = resp.data;
+            $( "#msgclass" ).html(
+				$( "#classTemplate" ).render( classes )
+			);
+
+        } else {
+            alert(resp.errmsg);
+        }
+
+    }, "json");
+
+    $("#logout a").click(function(e){
+    	$.ajax({
+            url:"/api/v1.0/session",
+            type:"delete",
+            contentType: "application/json",
+            dataType: "json",
+            headers:{
+                "X-CSRFToken":getCookie("csrf_token")
+            },
+            success: function (resp) {
+                if (resp.errno == "0") {
+                    location.href = "/login.html";
+                }
+                else {
+                	location.href = "/login.html";
+                }
+            }
+        });
+    })
+
+	$("#search-form").submit(function(e){
+		e.preventDefault();
+        if(!$("#start_date").val() || !$("#end_date").val()){
+            $("#notice").html("必须输入起止时间！");
+            $("#notice").show();
+            return;
+        };
+        sd = new Date($("#start_date").val().replace(/-/,"/"));
+        ed = new Date($("#end_date").val().replace(/-/,"/"));
+        days = Math.floor((ed - sd) / (24 * 3600 * 1000));
+        if(days > 366){
+            $("#notice").html("时间间隔不能超过一年！");
+            $("#notice").show();
+            return;
+        }
+        $("#notice").hide();
+        location.href = "/faredetails.html?start_date="+$("#start_date").val()+"&end_date="+$("#end_date").val()+"&msg_status="+$("#msg_status").val()
+	})
+})
