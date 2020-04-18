@@ -30,16 +30,28 @@ def send():
                 or req_dict.get('send_class') == "" or req_dict.get('send_name') == ""
                 or req_dict.get('msgcontent') == "" or req_dict.get('receivers') == []):
             raise ValidationException(code=RET.PARAMERR, msg="参数错误，请检查必填项")
+        if (str(req_dict.get('apply_no')).isspace() or str(req_dict.get('org_code')).isspace()
+                or str(req_dict.get('org_name')).isspace() or str(req_dict.get('send_class')).isspace()
+                or str(req_dict.get('send_name')).isspace() or str(req_dict.get('msgcontent')).isspace()):
+            raise ValidationException(code=RET.PARAMERR, msg="参数错误，请检查必填项")
         if type(req_dict.get('receivers')) != list:
             raise ValidationException(code=RET.PARAMERR, msg="参数错误，receivers必须是一个数组")
         if len(req_dict.get('receivers')) > 12000:
             raise ValidationException(code=RET.PARAMERR, msg="参数错误，receivers个数不能超过12000个")
         r_names = list(map(lambda x: x.get('name'), req_dict.get('receivers')))
         r_mobiles = list(map(lambda x: x.get('mobile'), req_dict.get('receivers')))
-        if r_names.count('') > 0 or r_names.count(None) > 0:
+        if r_names.count(None) > 0:
             current_app.logger.info('接收人姓名不能为空')
             raise ValidationException(code=RET.PARAMERR, msg="接收人姓名不能为空")
-        if r_mobiles.count('') > 0 or r_mobiles.count(None) > 0:
+        if r_mobiles.count(None) > 0:
+            current_app.logger.info('接收人手机号不能为空')
+            raise ValidationException(code=RET.PARAMERR, msg="接收人手机号不能为空")
+        s_names = [str(name).strip() for name in r_names]
+        s_mobiles = [str(mobile).strip() for mobile in r_mobiles]
+        if s_names.count('') > 0:
+            current_app.logger.info('接收人姓名不能为空')
+            raise ValidationException(code=RET.PARAMERR, msg="接收人姓名不能为空")
+        if s_mobiles.count('') > 0:
             current_app.logger.info('接收人手机号不能为空')
             raise ValidationException(code=RET.PARAMERR, msg="接收人手机号不能为空")
         current_app.logger.info(g.current_user.name)
