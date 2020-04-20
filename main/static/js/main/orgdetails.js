@@ -20,6 +20,10 @@ $(document).ready(function() {
     var endDate = queryData["end_date"];
     var orgCode = queryData["org_code"];
     var orgName = queryData["org_name"];
+    if(startDate=='' || endDate=='' || orgCode=='' ||
+        startDate==undefined || endDate==undefined || orgCode==undefined){
+        location.href = "/search.html";
+    }
     $("#start_date").val(startDate)
     $("#end_date").val(endDate)
     $("#org_code").val(orgCode)

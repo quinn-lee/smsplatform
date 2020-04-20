@@ -19,6 +19,9 @@ $(document).ready(function() {
     var startDate = queryData["start_date"];
     var endDate = queryData["end_date"];
     var msgStatus = queryData["msg_status"];
+    if(startDate=='' || endDate=='' || startDate==undefined || endDate==undefined){
+        location.href = "/fare.html";
+    }
     $("#start_date").val(startDate)
     $("#end_date").val(endDate)
     $("#msg_status").val(msgStatus)
