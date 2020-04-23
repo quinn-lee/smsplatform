@@ -13,6 +13,7 @@ import datetime
 def send():
     try:
         current_app.logger.info(str(request.headers))
+        current_app.logger.info("request_data: {}".format(request.get_data()))
         try:
             req_dict = request.get_json()
             current_app.logger.info("request_json: {}".format(req_dict))
