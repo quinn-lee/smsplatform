@@ -70,10 +70,9 @@ class User(db.Model):
     @staticmethod
     @auth.verify_token
     def verify_token(token):
+        current_app.logger.info("token: {}".format(token))
         uuid, timestamp, md5_code = token.split("&")
-        print(uuid)
-        print(timestamp)
-        print(md5_code)
+        current_app.logger.info("uuid: {}; ts: {}; md5: {}".format(uuid, timestamp, md5_code))
         if int((time.time() * 1000 - int(timestamp)) / 1000 / 60) > 5:
             g.auth_msg = "权限验证失败，时间戳与当前时间差大于5分钟"
             return False
