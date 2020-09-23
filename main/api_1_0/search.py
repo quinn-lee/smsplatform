@@ -154,11 +154,10 @@ def fare_details():
 @api.route("/balance", methods=["GET"])
 def balance():
     try:
-        smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
-        result = json.loads(smsapi.balance())
-        if result.get('code') != "0":
-            raise Exception(result.get('msg'))
-        return jsonify(errno=result.get('code'), data=[{'balance': result.get('data').get('balance')}])
+        #smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
+        smsapi = SmsApi("139.129.107.160", 8085, "126631", "ac87f26fed1f5907482ef7ea984ead6f")
+        result = smsapi.balance()
+        return jsonify(errno="0", data=[{'balance': result}])
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno="0", errmsg=str(e))

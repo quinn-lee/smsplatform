@@ -3,9 +3,58 @@ from . import api
 from main import models, auth, db
 from flask import current_app, request, jsonify, g
 from main.utils.response_code import RET
-from main.models import MessageTask, TaskQueue
+from main.models import MessageTask, TaskQueue, MessageLog
 from main.exceptions import ValidationException
 import datetime
+import xmltodict
+import json
+from sqlalchemy import Sequence
+import time
+
+
+@api.route("/report", methods=["POST"])
+def report():
+    try:
+        current_app.logger.info(str(request.headers))
+        current_app.logger.info("request_data: {}".format(request.get_data()))
+        try:
+            req_json = json.loads(json.dumps(xmltodict.parse(request.get_data())))
+            current_app.logger.info("request_json: {}".format(req_json))
+        except Exception as e:
+            current_app.logger.info(e)
+            raise ValidationException(code=RET.NOTXML, msg="参数非Xml格式")
+        sequence = Sequence('some_no_seq')
+        seq = db.session.execute(sequence)
+        callback_id = "C{}{}".format(str(int(round(time.time() * 1000))), seq)
+        new_tq = TaskQueue(queue_no=callback_id, task_type='callback', status='init', try_amount=20,
+                           tried_amount=0)
+        db.session.add(new_tq)
+        for message in req_json.get('Response').get('Report'):
+            mls = MessageLog.query.filter_by(mt_taskid=message.get('MsgID'), mobile=message.get('Mobile'))
+            for ml in mls:
+                curr_time = datetime.datetime.now()
+                if message.get('Status') == 'DELIVRD':
+                    ml.msg_status = 'success'
+                else:
+                    ml.msg_status = 'failure'
+                ml.mtq_code = message.get('Status')
+                ml.mtq_msg = message.get('Status')
+                ml.mtq_time = curr_time
+                ml.mtq_stime = curr_time.strftime("%Y%m%d%H%M%S")
+                ml.callback_id = callback_id
+                db.session.add(ml)
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(e)
+            db.session.rollback()
+            raise ValidationException(code=RET.DBERR, msg="数据库异常")
+        return RET.OK
+    except ValidationException as e:
+        return e.code
+    except Exception as e:
+        return RET.UNKOWNERR
 
 
 @api.route("/sms/send", methods=["GET", "POST"])

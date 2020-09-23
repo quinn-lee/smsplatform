@@ -21,6 +21,7 @@ class RET:
     SERVERERR = "4500"
     UNKOWNERR = "4501"
     NOTJSON = "4600"
+    NOTXML = "4601"
 
 
 error_map = {

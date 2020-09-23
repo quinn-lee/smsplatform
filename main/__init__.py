@@ -40,7 +40,7 @@ file_log_handler.setFormatter(formatter)
 # 为全局日志工具对象添加日志记录器
 logging.getLogger().addHandler(file_log_handler)
 
-
+'''
 def report_query():
     """发送短信的定时查询任务"""
     with app.app_context():
@@ -50,7 +50,7 @@ def report_query():
 
         async def query_sms(t):
             try:
-                smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
+                smsapi = SmsApi("139.129.107.160", 8085, "126631", "ac87f26fed1f5907482ef7ea984ead6f")
                 result = json.loads(smsapi.query())
                 print(result)
                 if result.get('code') == "0":  # 成功
@@ -106,6 +106,7 @@ def report_query():
                 print('Task report_query ret: ', task.result())
         except Exception as e:
             print("report_query error-{}".format(e))
+'''
 
 
 def handle_apply():
@@ -141,12 +142,12 @@ def handle_apply():
                 if MsgClass.query.filter_by(user_id=mt.user_id, send_class=mt.send_class).count() == 0:
                     mc = MsgClass(user_id=mt.user_id, send_class=mt.send_class)
                     db.session.add(mc)
-                for i in range(0, len(mt.receivers), 1000):
-                    mobiles = mt.receivers[i: i + 1000]
+                for i in range(0, len(mt.receivers), 500):
+                    mobiles = mt.receivers[i: i + 500]
                     sequence = Sequence('some_no_seq')
                     seq = db.session.execute(sequence)
                     message_id = "M{}{}".format(str(int(round(time.time() * 1000))), seq)
-                    new_tq = TaskQueue(queue_no=message_id, task_type='send', status='init', try_amount=20,
+                    new_tq = TaskQueue(queue_no=message_id, task_type='send', status='init', try_amount=3,
                                        tried_amount=0)
                     db.session.add(new_tq)
                     for mobile in mobiles:
@@ -253,21 +254,17 @@ def send_sms():
                     return "{} no messages to send".format(tq.queue_no)
                 mobiles = ','.join(set([str(ml.mobile).replace(',', '') for ml in mls]))
                 msg = mls.first().msgcontent
-                smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
-                result = json.loads(smsapi.send(mobiles, msg, tq.queue_no))
+                smsapi = SmsApi("139.129.107.160", 8085, "126631", "ac87f26fed1f5907482ef7ea984ead6f")
+                result = smsapi.send(mobiles, msg)
                 print(result)
-                if result.get('code') == "0":  # 成功
+                if int(result) > 0:  # 成功
                     tq.status = 'succ'
                     tq.last_handle_result = None
                     db.session.add(tq)
                     for ml in mls:
-                        try:
-                            mt_taskid = result.get('data').get('taskid')
-                        except Exception:
-                            mt_taskid = None
-                        ml.mt_code = result.get('code')
-                        ml.mt_msg = result.get('msg')
-                        ml.mt_taskid = mt_taskid
+                        ml.mt_code = '1'
+                        ml.mt_msg = '提交成功'
+                        ml.mt_taskid = result
                         db.session.add(ml)
                     try:
                         db.session.commit()
@@ -277,7 +274,7 @@ def send_sms():
                         raise exp
                     return "{} success".format(tq.queue_no)
                 else:  # 失败
-                    raise Exception("{}-{}".format(result.get('code'), result.get('msg')))
+                    raise Exception("{}".format(result))
             except Exception as error:
                 tq.tried_amount = tq.tried_amount + 1
                 if tq.tried_amount > tq.try_amount:
@@ -324,7 +321,7 @@ def send_sms():
                 db.session.rollback()
 
 
-# 定时调用发送短信接口
+# 定时调用回调接口
 def report_sms():
     """推送HIS短信报告定时任务"""
     with app.app_context():
@@ -440,12 +437,6 @@ def create_app(environment):
                     'func': handle_apply,
                     "trigger": "interval",
                     "seconds": 10
-                },
-                {
-                    'id': 'report_query',
-                    'func': report_query,
-                    "trigger": "interval",
-                    "seconds": 5
                 },
                 {
                     'id': 'send_sms',
