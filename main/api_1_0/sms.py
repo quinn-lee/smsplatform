@@ -29,7 +29,12 @@ def report():
         new_tq = TaskQueue(queue_no=callback_id, task_type='callback', status='init', try_amount=20,
                            tried_amount=0)
         db.session.add(new_tq)
-        for message in req_json.get('Response').get('Report'):
+        mobiles_arr = []
+        if type(req_json.get('Response').get('Report')) == dict:
+            mobiles_arr = [req_json.get('Response').get('Report')]
+        elif type(req_json.get('Response').get('Report')) == list:
+            mobiles_arr = req_json.get('Response').get('Report')
+        for message in mobiles_arr:
             mls = MessageLog.query.filter_by(mt_taskid=message.get('MsgID'), mobile=message.get('Mobile'))
             for ml in mls:
                 curr_time = datetime.datetime.now()
