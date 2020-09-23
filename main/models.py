@@ -157,10 +157,10 @@ class MessageLog(db.Model):
     name = db.Column(db.String(256))  # 姓名
     age = db.Column(db.Integer)  # 年龄
     id_no = db.Column(db.String(128))  # 身份证号
-    mobile = db.Column(db.String(128))  # 手机号码
+    mobile = db.Column(db.String(128), index=True)  # 手机号码
     mt_code = db.Column(db.String(30))  # 电信返回的状态码
     mt_msg = db.Column(db.String(256))  # 电信返回的状态描述
-    mt_taskid = db.Column(db.String(50))  # 电信返回的任务ID
+    mt_taskid = db.Column(db.String(50), index=True)  # 电信返回的任务ID
     mtq_code = db.Column(db.String(128))  # 查询接口返回的状态码
     mtq_msg = db.Column(db.String(256))  # 查询接口返回的状态描述
     mtq_time = db.Column(db.DateTime)  # 查询接口返回的接收时间
@@ -235,7 +235,7 @@ class TaskQueue(db.Model):
     queue_no = db.Column(db.String(32), index=True)  # 任务号 or 短信请求唯一号 or 短信回调唯一号
     task_type = db.Column(db.String(32))  # 任务类型 apply|send|callback
     status = db.Column(db.String(32))  # 任务状态
-    run_batch = db.Column(db.String(32))  # 处理批次
+    run_batch = db.Column(db.String(32), index=True)  # 处理批次
     last_handle_time = db.Column(db.DateTime)  # 最近一次处理时间
     last_handle_result = db.Column(db.String(256))  # 最近一次处理结果
     try_amount = db.Column(db.Integer, default=20)  # 可重试次数
