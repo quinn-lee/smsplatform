@@ -43,7 +43,7 @@ class Excel(object):
 
 
 # 带token认证的post
-def token_post(method, data):
+def token_post(ip, port, method, data):
     conn = None
     try:
         from main.models import User
@@ -53,7 +53,7 @@ def token_post(method, data):
         print(md5_code)
         headers = {"Content-type": "application/json",
                    "Authorization": "Token {}&{}&{}".format(user.uuid, ts, md5_code)}
-        conn = http.client.HTTPConnection("127.0.0.1", "80", timeout=200)
+        conn = http.client.HTTPConnection(ip, port, timeout=200)
         conn.request("POST", method, data, headers)
         response = conn.getresponse()
         retmsg = response.read().decode("utf8")

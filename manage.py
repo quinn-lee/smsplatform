@@ -58,11 +58,11 @@ def test_api():
                 "age": 30,
                 "id_no": "35082119860409045X",
                 "mobile": "13305915399"
-            } for i in range(1230)
+            } for i in range(2)
         ]
     }
     from main.utils.commons import token_post
-    res = token_post("/api/v1.0/sms/send", json.dumps(data))
+    res = token_post("127.0.0.1", "8100", "/api/v1.0/sms/send", json.dumps(data))
     print(res)
 
 
