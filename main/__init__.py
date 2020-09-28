@@ -135,6 +135,7 @@ def handle_apply():
 
         async def process_tq(tq):
             try:
+                current_app.logger.info("apply queue_no={}".format(tq.queue_no))
                 mt = MessageTask.query.filter_by(task_no=tq.queue_no).first()
                 if MsgOrg.query.filter_by(user_id=mt.user_id, org_code=mt.org_code).count() == 0:
                     mo = MsgOrg(user_id=mt.user_id, org_code=mt.org_code, org_name=mt.org_name)
@@ -249,6 +250,7 @@ def send_sms():
 
         async def send_tq(tq):
             try:
+                current_app.logger.info("send queue_no={}".format(tq.queue_no))
                 mls = MessageLog.query.filter_by(message_id=tq.queue_no)
                 if mls.count() == 0:
                     return "{} no messages to send".format(tq.queue_no)
@@ -348,6 +350,7 @@ def report_sms():
 
         async def report_tq(tq):
             try:
+                current_app.logger.info("report queue_no={}".format(tq.queue_no))
                 mls = MessageLog.query.filter_by(callback_id=tq.queue_no)
                 if mls.count() == 0:
                     return "{} no messages to report".format(tq.queue_no)
@@ -356,7 +359,8 @@ def report_sms():
                          "msg": ml.mtq_msg, "mobile": ml.mobile, "time": ml.mtq_stime} for ml in mls]
                 print("report data count: ", len(data))
                 from main.utils.commons import common_post
-                result = common_post("127.0.0.1", "5000", "/api/v1.0/report/push", json.dumps(data))
+                result = common_post("10.127.219.15", "8100", "/SMSSend_Longyan/SMS_Reply", json.dumps(data))
+                current_app.logger.info("report result={}".format(result))
                 if result == "SUCCESS":  # 成功
                     tq.status = 'succ'
                     tq.last_handle_result = None

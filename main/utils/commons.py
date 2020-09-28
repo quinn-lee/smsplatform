@@ -7,6 +7,7 @@ import http.client
 import xlsxwriter
 import sys
 import importlib
+from flask import current_app
 importlib.reload(sys)
 
 
@@ -74,6 +75,7 @@ def common_post(ip, port, method, data):
         conn = http.client.HTTPConnection(ip, port, timeout=200)
         conn.request("POST", method, data, headers)
         response = conn.getresponse()
+        current_app.logger.info("response={}".format(response))
         retmsg = response.read().decode("utf8")
         conn.close()
         return retmsg
