@@ -358,8 +358,9 @@ def report_sms():
                 data = [{"taskid": ml.task_no, "apply_no": ml.apply_no, "code": ml.mtq_code,
                          "msg": ml.mtq_msg, "mobile": ml.mobile, "time": ml.mtq_stime} for ml in mls]
                 print("report data count: ", len(data))
+                current_app.logger.info("report data={}".format(json.dumps(data)))
                 from main.utils.commons import common_post
-                result = common_post("10.127.219.15", "8100", "/SMSSend_Longyan/SMS_Reply", json.dumps(data))
+                result = common_post("192.168.150.6", "8100", "/SMSSend_Longyan/SMS_Reply", json.dumps(data))
                 current_app.logger.info("report result={}".format(result))
                 if result == "SUCCESS":  # 成功
                     tq.status = 'succ'

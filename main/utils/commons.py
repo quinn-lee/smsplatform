@@ -77,6 +77,7 @@ def common_post(ip, port, method, data):
         response = conn.getresponse()
         current_app.logger.info("response={}".format(response))
         retmsg = response.read().decode("utf8")
+        current_app.logger.info("retmsg={}".format(retmsg))
         conn.close()
         return retmsg
     except Exception as e:
