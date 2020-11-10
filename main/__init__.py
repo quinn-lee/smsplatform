@@ -117,7 +117,7 @@ def handle_apply():
         from main.models import TaskQueue, MessageLog, MessageTask, MsgClass, MsgOrg
         ts = time.strftime("%Y%m%d%H%M%S", time.localtime())
         tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == None,
-                                     TaskQueue.task_type == 'apply').limit(5000)
+                                     TaskQueue.task_type == 'apply').limit(1000)
         if tqs.count() == 0:
             current_app.logger.info("no tqs to handle!!!")
             return
@@ -232,7 +232,7 @@ def send_sms():
         from main.models import TaskQueue, MessageLog, MessageTask
         ts = time.strftime("%Y%m%d%H%M%S", time.localtime())
         tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == None,
-                                     TaskQueue.task_type == 'send').limit(5000)
+                                     TaskQueue.task_type == 'send').limit(1000)
         if tqs.count() == 0:
             current_app.logger.info("no tqs to send!!!")
             return
@@ -332,7 +332,7 @@ def report_sms():
         from main.models import TaskQueue, MessageLog, MessageTask
         ts = time.strftime("%Y%m%d%H%M%S", time.localtime())
         tqs = TaskQueue.query.filter(TaskQueue.status.in_(['init', 'fail']), TaskQueue.run_batch == None,
-                                     TaskQueue.task_type == 'callback').limit(5000)
+                                     TaskQueue.task_type == 'callback').limit(1000)
         if tqs.count() == 0:
             current_app.logger.info("no tqs to report!!!")
             return
