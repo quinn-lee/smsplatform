@@ -11,12 +11,20 @@ if ERRORLEVEL 1 (
   start /b python server.py 8081
   start /b python server.py 8082
   start /b python server.py 8083
+  start /b python server.py 8084
+  start /b python server.py 8085
+  start /b python server.py 8086
+  start /b python server.py 8087
 ) else (
   taskkill /F /IM python.exe /T
   start /b python server.py 8080
   start /b python server.py 8081
   start /b python server.py 8082
   start /b python server.py 8083
+  start /b python server.py 8084
+  start /b python server.py 8085
+  start /b python server.py 8086
+  start /b python server.py 8087
 )
 
 

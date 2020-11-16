@@ -360,7 +360,7 @@ def report_sms():
                 print("report data count: ", len(data))
                 current_app.logger.info("report data={}".format(json.dumps(data)))
                 from main.utils.commons import common_post
-                result = common_post("10.1.37.1", "8100", "/SMSSend_Longyan/SMS_Reply", json.dumps(data))
+                result = common_post("192.168.150.16", "8100", "/SMSSend_Longyan/SMS_Reply", json.dumps(data))
                 current_app.logger.info("report result={}".format(result))
                 if result == "SUCCESS":  # 成功
                     tq.status = 'succ'
