@@ -253,6 +253,15 @@ def send_sms():
                 current_app.logger.info("send queue_no={}".format(tq.queue_no))
                 mls = MessageLog.query.filter_by(message_id=tq.queue_no)
                 if mls.count() == 0:
+                    tq.status = 'succ'
+                    tq.last_handle_result = None
+                    db.session.add(tq)
+                    try:
+                        db.session.commit()
+                    except Exception as exp:
+                        print("rollback1")
+                        db.session.rollback()
+                        raise exp
                     return "{} no messages to send".format(tq.queue_no)
                 mobiles = ','.join(set([str(ml.mobile).replace(',', '') for ml in mls]))
                 msg = mls.first().msgcontent
@@ -274,7 +283,7 @@ def send_sms():
                         print("rollback1")
                         db.session.rollback()
                         raise exp
-                    return "{} success".format(tq.queue_no)
+                    return "{} send success".format(tq.queue_no)
                 else:  # 失败
                     raise Exception("{}".format(result))
             except Exception as error:
@@ -353,6 +362,15 @@ def report_sms():
                 current_app.logger.info("report queue_no={}".format(tq.queue_no))
                 mls = MessageLog.query.filter_by(callback_id=tq.queue_no)
                 if mls.count() == 0:
+                    tq.status = 'succ'
+                    tq.last_handle_result = None
+                    db.session.add(tq)
+                    try:
+                        db.session.commit()
+                    except Exception as exp:
+                        print("rollback1")
+                        db.session.rollback()
+                        raise exp
                     return "{} no messages to report".format(tq.queue_no)
 
                 data = [{"taskid": ml.task_no, "apply_no": ml.apply_no, "code": ml.mtq_code,
@@ -372,7 +390,7 @@ def report_sms():
                         print("rollback1")
                         db.session.rollback()
                         raise exp
-                    return "{} success".format(tq.queue_no)
+                    return "{} report success".format(tq.queue_no)
                 else:  # 失败
                     raise Exception(result)
             except Exception as error:
@@ -441,19 +459,19 @@ def create_app(environment):
                     'id': 'handle_apply',
                     'func': handle_apply,
                     "trigger": "interval",
-                    "seconds": 2
+                    "seconds": 3
                 },
                 {
                     'id': 'send_sms',
                     'func': send_sms,
                     "trigger": "interval",
-                    "seconds": 2
+                    "seconds": 3
                 },
                 {
                     'id': 'report_sms',
                     'func': report_sms,
                     "trigger": "interval",
-                    "seconds": 2
+                    "seconds": 3
                 }
             ],
             'SCHEDULER_TIMEZONE': 'Asia/Shanghai',
