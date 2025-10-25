@@ -8,7 +8,10 @@ from sqlalchemy.sql import func
 from main.utils.commons import Excel
 import time
 from main.libs.smsapi import SmsApi
+from main.libs.smsv2api import Smsv2Api
 import json
+
+
 
 
 @api.route("/msg_orgs", methods=["GET"])
@@ -155,9 +158,13 @@ def fare_details():
 def balance():
     try:
         #smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
-        smsapi = SmsApi("139.129.107.160", 8085, "126631", "ac87f26fed1f5907482ef7ea984ead6f")
-        result = smsapi.balance()
-        return jsonify(errno="0", data=[{'balance': result}])
+        #smsapi = SmsApi("139.129.107.160", 8085, "126631", "ac87f26fed1f5907482ef7ea984ead6f")
+        smsapi = Smsv2Api("47.99.242.143", "7862", "222492", "$x_Gn8U", "10690")
+        result = json.loads(smsapi.balance())
+        if result['status'] == 0:
+            return jsonify(errno="0", data=[{'balance': result['balance']}])
+        else:
+            return jsonify(errno="0", errmsg="错误代码：{}".format(result['status']))
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno="0", errmsg=str(e))
@@ -166,11 +173,12 @@ def balance():
 @api.route("/message", methods=["GET"])
 def message():
     try:
-        smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
+        #smsapi = SmsApi("47.111.38.50", 8081, "350122", "736b8235fc654cdd979dd0865972b700")
+        smsapi = Smsv2Api("47.99.242.143", "7862", "222492", "$x_Gn8U", "10690")
         result = json.loads(smsapi.balance())
-        if result.get('code') != "0":
-            raise Exception(result.get('msg'))
-        num = result.get('data').get('balance')
+        if result.get('status') != 0:
+            raise Exception(result.get('status'))
+        num = result.get('balance')
         if int(num) >= 10000:
             raise Exception("短信剩余条数不用提示")
         return jsonify(errno="0", data=[{'mtitle': '余额预警',
