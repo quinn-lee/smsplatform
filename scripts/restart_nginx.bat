@@ -1,5 +1,5 @@
-C:
-cd C:\nginx-1.16.1
+D:
+cd D:\nginx-1.29.2
 tasklist|findstr -i "nginx.exe"
 if ERRORLEVEL 1 (
   start nginx.exe

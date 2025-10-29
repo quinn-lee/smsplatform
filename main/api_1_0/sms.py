@@ -5,6 +5,7 @@ from flask import current_app, request, jsonify, g
 from main.utils.response_code import RET
 from main.models import MessageTask, TaskQueue, MessageLog
 from main.exceptions import ValidationException
+from main.libs.smsv2api import Smsv2Api
 import datetime
 import xmltodict
 import json
@@ -139,6 +140,61 @@ def send():
     except Exception as e:
         return jsonify(code=RET.UNKOWNERR, msg=str(e))
 
+@api.route("/sms/captcha", methods=["GET", "POST"])
+@auth.login_required
+def sms_captcha():
+    try:
+        current_app.logger.info(str(request.headers))
+        current_app.logger.info("request_data: {}".format(request.get_data()))
+        try:
+            req_dict = request.get_json()
+            current_app.logger.info("request_json: {}".format(req_dict))
+        except Exception as e:
+            current_app.logger.info(e)
+            raise ValidationException(code=RET.NOTJSON, msg="参数非Json格式")
+        if req_dict is None:
+            raise ValidationException(code=RET.NOTJSON, msg="参数非Json格式")
+        # 参数验证
+        if (req_dict.get('apply_no') is None or req_dict.get('org_code') is None
+                or req_dict.get('org_name') is None or req_dict.get('msg_content') is None
+                or req_dict.get('phone_num') is None):
+            raise ValidationException(code=RET.PARAMERR, msg="参数错误，请检查必填项")
+        if (req_dict.get('apply_no') == "" or req_dict.get('org_code') == ""
+                or req_dict.get('org_name') == "" or req_dict.get('msg_content') == ""
+                or req_dict.get('phone_num') == ""):
+            raise ValidationException(code=RET.PARAMERR, msg="参数错误，请检查必填项")
+        if (str(req_dict.get('apply_no')).isspace() or str(req_dict.get('org_code')).isspace()
+                or str(req_dict.get('org_name')).isspace() or str(req_dict.get('msg_content')).isspace()
+                or str(req_dict.get('phone_num')).isspace()):
+            raise ValidationException(code=RET.PARAMERR, msg="参数错误，请检查必填项")
+
+        sequence = Sequence('some_no_seq')
+        seq = db.session.execute(sequence)
+        message_id = "M{}{}".format(str(int(round(time.time() * 1000))), seq)
+        ml = MessageLog(message_id=message_id,
+                        user_id=g.current_user.id,
+                        apply_no=req_dict.get('apply_no'),
+                        org_code=req_dict.get('org_code'),
+                        org_name=req_dict.get('org_name'),
+                        send_class="验证码",
+                        msgcontent=req_dict.get('msg_content'),
+                        mobile=req_dict.get('phone_num'))
+        smsv2api = Smsv2Api("47.99.242.143", "7862", "222492", "$x_Gn8U", "10690")
+        result = json.loads(smsv2api.send(ml.mobile, ml.msgcontent, ml.message_id))
+        ml.mt_code = result['status']
+        db.session.add(ml)
+        try:
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(e)
+            db.session.rollback()
+            raise ValidationException(code=RET.DBERR, msg="数据库异常")
+
+        return jsonify(code=RET.OK, msg="成功")
+    except ValidationException as e:
+        return jsonify(code=e.code, msg=e.msg)
+    except Exception as e:
+        return jsonify(code=RET.UNKOWNERR, msg=str(e))
 
 @auth.error_handler
 def auth_error():

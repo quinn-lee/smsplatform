@@ -252,6 +252,8 @@ class MsgOrg(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # 所属用户
     org_code = db.Column(db.String(256))  # 医院代码
     org_name = db.Column(db.String(256))  # 医院名称
+    sms_operator = db.Column(db.String(256)) # 短信运营商
+    sms_expiration_date = db.Column(db.DateTime) # 合同到期时间
     created_at = db.Column(db.DateTime, default=datetime.datetime.now)  # 创建时间
 
 
