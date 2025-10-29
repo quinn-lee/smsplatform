@@ -65,6 +65,21 @@ def test_api():
     res = token_post("127.0.0.1", "8100", "/api/v1.0/sms/send", json.dumps(data))
     print(res)
 
+@manager.command
+def test_captcha():
+    apply_no = input('Apply_no> ')
+    data = {
+        "apply_no": apply_no,
+        "org_code": "tzyy",
+        "org_name": "汀州医院",
+        "msg_content": "【无限云】验证码4444",
+        "phone_num": "13917050484",
+
+    }
+    from main.utils.commons import token_post
+    res = token_post("127.0.0.1", "8081", "/api/v1.0/sms/captcha", json.dumps(data))
+    print(res)
+
 
 if __name__ == "__main__":
     manager.run()

@@ -178,10 +178,22 @@ def sms_captcha():
                         org_name=req_dict.get('org_name'),
                         send_class="验证码",
                         msgcontent=req_dict.get('msg_content'),
-                        mobile=req_dict.get('phone_num'))
-        smsv2api = Smsv2Api("47.99.242.143", "7862", "222492", "$x_Gn8U", "10690")
-        result = json.loads(smsv2api.send(ml.mobile, ml.msgcontent, ml.message_id))
-        ml.mt_code = result['status']
+                        mobile=req_dict.get('phone_num'),
+                        mt_code="0",
+                        mt_msg="0")
+        try:
+            smsv2api = Smsv2Api("47.99.242.143", "7862", "222492", "$x_Gn8U", "10690")
+            result = json.loads(smsv2api.send(ml.mobile, ml.msgcontent, ml.message_id))
+            if result["status"] != 0:
+                ml.mt_code = str(result['status'])
+            else:
+                list1 = result["list"][0]
+                if list1 is not None and list1["result"] != 0:
+                    ml.mt_msg = str(list1["result"])
+        except Exception as e:
+            current_app.logger.error(e)
+            raise ValidationException(code=RET.THIRDERR, msg="数据库异常")
+
         db.session.add(ml)
         try:
             db.session.commit()
@@ -190,7 +202,13 @@ def sms_captcha():
             db.session.rollback()
             raise ValidationException(code=RET.DBERR, msg="数据库异常")
 
-        return jsonify(code=RET.OK, msg="成功")
+        if ml.mt_code == "0" and ml.mt_msg == "0":
+            return jsonify(code=RET.OK, msg="成功")
+        else:
+            if ml.mt_code != "0":
+                return jsonify(code=ml.mt_code, msg=RET.ret_map(ml.mt_code))
+            else:
+                return jsonify(code=ml.mt_msg, msg=RET.ret_map(ml.mt_msg))
     except ValidationException as e:
         return jsonify(code=e.code, msg=e.msg)
     except Exception as e:
