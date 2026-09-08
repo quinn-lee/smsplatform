@@ -206,9 +206,9 @@ def sms_captcha():
             return jsonify(code=RET.OK, msg="成功")
         else:
             if ml.mt_code != "0":
-                return jsonify(code=ml.mt_code, msg=RET.ret_map(ml.mt_code))
+                return jsonify(code=ml.mt_code, msg=RET.ret_map[ml.mt_code])
             else:
-                return jsonify(code=ml.mt_msg, msg=RET.ret_map(ml.mt_msg))
+                return jsonify(code=ml.mt_msg, msg=RET.ret_map[ml.mt_msg])
     except ValidationException as e:
         return jsonify(code=e.code, msg=e.msg)
     except Exception as e:
